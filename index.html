@@ -197,6 +197,15 @@
                     </select>
                 </div>
             </div>
+            <div id="wrapperTipoVista" class="form-group" style="grid-column: 1 / -1; margin-top: 10px; display: flex; gap: 20px; align-items: center;">
+                    <label style="margin-bottom: 0;">Visualización:</label>
+                    <label style="display: inline-flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer;">
+                        <input type="radio" name="tipoVistaConsulta" value="equipos" checked> Por Equipos
+                    </label>
+                    <label style="display: inline-flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer;">
+                        <input type="radio" name="tipoVistaConsulta" value="alumnos"> Por Alumnos (Orden Alfabético)
+                    </label>
+                </div>
             <button id="btnBuscarCalificaciones" class="btn-primary" style="margin-top: 15px; width: 100%;" disabled>Buscar Registros</button>
         </div>
 
@@ -232,10 +241,6 @@
             <p id="modalStatusText">La calificación fue calculada y registrada correctamente.</p>
         </div>
     </div>
-
-    <script src="semestre2.js"></script>
-<script src="semestre4.js"></script>
-<script src="semestre6.js"></script>
 
 <script src="grupos.js"></script>
 <script src="materias.js"></script>
