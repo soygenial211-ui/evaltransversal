@@ -1,320 +1,178 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Evaluación PEC 2026</title>
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --accent-color: #27ae60;
-            --bg-color: #f4f7f6;
-            --reset-color: #e74c3c;
-            
-            /* Colores de niveles */
-            --color-excelente: #27ae60;
-            --color-bueno: #f1c40f;
-            --color-regular: #e67e22;
-            --color-insuficiente: #e74c3c;
-            
-            /* Fondos suaves para selección */
-            --bg-excelente: #e8f6ef;
-            --bg-bueno: #fef9e7;
-            --bg-regular: #fdf2e9;
-            --bg-insuficiente: #fdedec;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1100px;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-        }
-
-        .actions {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 15px;
-        }
-
-        .btn-reset {
-            background-color: var(--reset-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-
-        .btn-reset:hover {
-            background-color: #c0392b;
-        }
-
-        .summary-card {
-            background: var(--primary-color);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-        }
-
-        .stat {
-            font-size: 1rem;
-        }
-
-        .stat span {
-            display: block;
-            font-weight: bold;
-            font-size: 1.8rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th {
-            background-color: #ecf0f1;
-            color: var(--primary-color);
-            padding: 12px;
-            text-align: left;
-            font-size: 0.85rem;
-        }
-
-        td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.85rem;
-            vertical-align: top;
-            width: 20%;
-        }
-
-        td:first-child {
-            background-color: #fdfdfd;
-            font-weight: bold;
-            cursor: default;
-            width: 15%;
-        }
-
-        /* Clases de selección por color dinámico */
-        td.selected[data-value="3"] {
-            background-color: var(--bg-excelente);
-            border: 3px solid var(--color-excelente);
-            font-weight: 600;
-        }
-        td.selected[data-value="2"] {
-            background-color: var(--bg-bueno);
-            border: 3px solid var(--color-bueno);
-            font-weight: 600;
-        }
-        td.selected[data-value="1"] {
-            background-color: var(--bg-regular);
-            border: 3px solid var(--color-regular);
-            font-weight: 600;
-        }
-        td.selected[data-value="0"] {
-            background-color: var(--bg-insuficiente);
-            border: 3px solid var(--color-insuficiente);
-            font-weight: 600;
-        }
-
-        @media (max-width: 768px) {
-            thead { display: none; }
-            tr { display: block; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; }
-            td { display: block; width: auto !important; padding-left: 40%; position: relative; }
-            td:first-child { background: var(--primary-color); color: white; text-align: center; padding: 10px; }
-            td:not(:first-child):before { content: attr(data-label); position: absolute; left: 15px; font-weight: bold; color: var(--primary-color); }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-    <h1>Rúbrica de Evaluación PEC 2026</h1>
-
-    <div class="actions">
-        <button class="btn-reset" onclick="resetRubric()">Resetear Valores</button>
+    <div id="menuPrincipal" class="welcome-container">
+        <h1>Evaluación PEC 2026</h1>
+        <p>Selecciona una acción para comenzar</p>
+        <div class="menu-grid">
+            <button id="btnModCalificar" class="menu-card btn-calificar">
+                <div class="menu-icon">📝</div>
+                <h3>Calificar Equipos</h3>
+                <small>Evaluar rúbricas y registrar nuevas calificaciones</small>
+            </button>
+            <button id="btnModConsultar" class="menu-card btn-consultar">
+                <div class="menu-icon">📊</div>
+                <h3>Consultar Calificaciones</h3>
+                <small>Ver calificaciones guardadas y detalles de rúbrica por grupo</small>
+            </button>
+        </div>
     </div>
 
-    <div class="summary-card">
-        <div class="stat">Puntos Totales <span id="totalPoints">0</span></div>
-        <div class="stat">Porcentaje <span id="totalPercent">0%</span></div>
-        <div class="stat">Ponderación (2.5) <span id="ponderacion">0.0</span></div>
-    </div>
+    <div id="secCalificar" class="view-section">
+        <div id="initialModal" class="card-box">
+            <div class="section-header">
+                <button class="btn-back-menu">← Menú</button>
+                <h2>Configuración de Evaluación</h2>
+            </div>
+            <div class="form-group">
+                <label for="modalSemestre">Semestre:</label>
+                <select id="modalSemestre">
+                    <option value="">Seleccione un semestre...</option>
+                    <option value="2do">2do Semestre</option>
+                    <option value="4to">4to Semestre</option>
+                    <option value="6to">6to Semestre</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modalMateria">Materia:</label>
+                <select id="modalMateria" disabled>
+                    <option value="">Seleccione una materia...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modalGrupo">Grupo:</label>
+                <select id="modalGrupo" disabled>
+                    <option value="">Seleccione un grupo...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modalEquipo">Equipo:</label>
+                <select id="modalEquipo" disabled>
+                    <option value="">Seleccione un equipo...</option>
+                </select>
+            </div>
 
-    <table id="rubricTable">
-        <thead>
-            <tr>
-                <th>Criterio</th>
-                <th>Excelente (3 pts)</th>
-                <th>Bueno (2 pts)</th>
-                <th>Regular (1 pt)</th>
-                <th>Insuficiente (0 pts)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr data-criterion="bitacora">
-                <td>Registros en Bitácora</td>
-                <td data-label="Excelente" data-value="3">Al menos 25 registros de visita.</td>
-                <td data-label="Bueno" data-value="2">Al menos 20 registros de visita.</td>
-                <td data-label="Regular" data-value="1">Al menos 15 registros de visita.</td>
-                <td data-label="Insuficiente" data-value="0">Menos de 15 registros de visita.</td>
-            </tr>
-            <tr data-criterion="redaccion">
-                <td>Redacción y Estructura</td>
-                <td data-label="Excelente" data-value="3">Redacción clara y estructurada.</td>
-                <td data-label="Bueno" data-value="2">En su mayoría clara, mínimos errores.</td>
-                <td data-label="Regular" data-value="1">Redacción parcial, errores frecuentes.</td>
-                <td data-label="Insuficiente" data-value="0">Deficiente redacción y ortografía.</td>
-            </tr>
-            <tr data-criterion="contenido">
-                <td>Contenido de la bitácora</td>
-                <td data-label="Excelente" data-value="3">Integra satisfactoriamente los 6 primeros elementos.</td>
-                <td data-label="Bueno" data-value="2">Integra satisfactoriamente al menos 4 elementos.</td>
-                <td data-label="Regular" data-value="1">Integra satisfactoriamente al menos 3 elementos.</td>
-                <td data-label="Insuficiente" data-value="0">Integra satisfactoriamente menos de 3 elementos.</td>
-            </tr>
-            <tr data-criterion="salud">
-                <td>Estado de Salud del Árbol</td>
-                <td data-label="Excelente" data-value="3">Condiciones propicias para su desarrollo futuro.</td>
-                <td data-label="Bueno" data-value="2">Buena salud, pero futuro comprometido.</td>
-                <td data-label="Regular" data-value="1">Salud y condiciones comprometen el desarrollo.</td>
-                <td data-label="Insuficiente" data-value="0">Estado deplorable y/o no sobrevivió.</td>
-            </tr>
-            <tr data-criterion="material">
-                <td>Cartel, tríptico o infografía</td>
-                <td data-label="Excelente" data-value="3">Información verídica, confiable y persuasiva.</td>
-                <td data-label="Bueno" data-value="2">Información relevante, pero no trasciende.</td>
-                <td data-label="Regular" data-value="1">Parcialmente muestra información básica.</td>
-                <td data-label="Insuficiente" data-value="0">Información ambigua o no entregó.</td>
-            </tr>
-            <tr data-criterion="colaborativo">
-                <td>Trabajo colaborativo</td>
-                <td data-label="Excelente" data-value="3">El equipo trabaja colaborativamente.</td>
-                <td data-label="Bueno" data-value="2">En su mayoría trabajan colaborativamente.</td>
-                <td data-label="Regular" data-value="1">Parcialmente colaborativo.</td>
-                <td data-label="Insuficiente" data-value="0">No trabajan colaborativamente.</td>
-            </tr>
-            <tr data-criterion="vestimenta">
-                <td>Vestimenta formal</td>
-                <td data-label="Excelente" data-value="3">Cumple con la vestimenta formal.</td>
-                <td data-label="Bueno" data-value="2">En su mayoría cumple.</td>
-                <td data-label="Regular" data-value="1">Cumple parcialmente.</td>
-                <td data-label="Insuficiente" data-value="0">No cumple.</td>
-            </tr>
-            <tr data-criterion="lenguaje">
-                <td>Lenguaje verbal y corporal</td>
-                <td data-label="Excelente" data-value="3">Maneja adecuadamente ambos lenguajes.</td>
-                <td data-label="Bueno" data-value="2">En su mayoría lo maneja adecuadamente.</td>
-                <td data-label="Regular" data-value="1">Parcialmente adecuado.</td>
-                <td data-label="Insuficiente" data-value="0">No es adecuado.</td>
-            </tr>
-            <tr data-criterion="tiempo">
-                <td>Tiempo de presentación</td>
-                <td data-label="Excelente" data-value="3">Utiliza de 11 a 15 minutos.</td>
-                <td data-label="Bueno" data-value="2">Utiliza de 7-10 o 16-19 minutos.</td>
-                <td data-label="Regular" data-value="1">Utiliza de 4-6 o 20-23 minutos.</td>
-                <td data-label="Insuficiente" data-value="0">Menos de 4 o más de 24 minutos.</td>
-            </tr>
-            <tr data-criterion="ppt">
-                <td>Estructura PowerPoint</td>
-                <td data-label="Excelente" data-value="3">Letra legible, ortografía correcta, imágenes.</td>
-                <td data-label="Bueno" data-value="2">Mínimos errores, imágenes adecuadas.</td>
-                <td data-label="Regular" data-value="1">Errores frecuentes, letra poco legible.</td>
-                <td data-label="Insuficiente" data-value="0">Errores graves, letra ilegible.</td>
-            </tr>
-            <tr data-criterion="asistencia">
-                <td>Puntualidad y asistencia</td>
-                <td data-label="Excelente" data-value="3">Puntual, preparado y responsable.</td>
-                <td data-label="Bueno" data-value="2">Puntual y participa brevemente.</td>
-                <td data-label="Regular" data-value="1">Llega tarde y participa poco.</td>
-                <td data-label="Insuficiente" data-value="0">No asiste.</td>
-            </tr>
-        </tbody>
-    </table>
+            <div id="integrantesContainer" style="display: none; background: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; border: 1px solid #cbd5e1;">
+    <strong style="color: var(--primary-color); display: block; margin-bottom: 4px;">Integrantes del equipo:</strong>
+    <span id="listaIntegrantesTexto" style="color: var(--text-main); line-height: 1.4;"></span>
 </div>
 
-<script>
-    const rows = document.querySelectorAll('tbody tr');
-    const totalPointsElem = document.getElementById('totalPoints');
-    const totalPercentElem = document.getElementById('totalPercent');
-    const ponderacionElem = document.getElementById('ponderacion');
-    
-    let scores = {};
 
-    function initScores() {
-        rows.forEach(row => {
-            scores[row.getAttribute('data-criterion')] = 0;
-        });
-    }
+            <button id="btnIniciar" class="btn-primary" disabled>Iniciar Evaluación</button>
+        </div>
 
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td:not(:first-child)');
-        const criterion = row.getAttribute('data-criterion');
+        <div id="mainContainer" class="container" style="display: none;">
+            <div class="header-navigation">
+                <button class="btn-navigation" id="btnCambiarEquipo">← Cambiar Equipo</button>
+            </div>
+            <h1 id="mainTitle">Rúbrica de Evaluación PEC 2026</h1>
+            <h3 id="subTitle"></h3>
+            
+            <div id="rubricForm" class="rubric-form">
+                <div class="criterion-card" data-criterion="bitacora"><label>Registros en Bitácora</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Menos de 15 registros.</option><option value="1" data-level="regular">REGULAR: Al menos 15 registros.</option><option value="2" data-level="bueno">BUENO: Al menos 20 registros.</option><option value="3" data-level="excelente">EXCELENTE: Al menos 25 registros.</option></select></div>
+                <div class="criterion-card" data-criterion="redaccion"><label>Redacción y Estructura</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Deficiente.</option><option value="1" data-level="regular">REGULAR: Parcial.</option><option value="2" data-level="bueno">BUENO: Mínimos errores.</option><option value="3" data-level="excelente">EXCELENTE: Clara.</option></select></div>
+                <div class="criterion-card" data-criterion="contenido"><label>Contenido de la bitácora</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Menos de 3.</option><option value="1" data-level="regular">REGULAR: Al menos 3.</option><option value="2" data-level="bueno">BUENO: Al menos 4.</option><option value="3" data-level="excelente">EXCELENTE: 6 elementos.</option></select></div>
+                <div class="criterion-card" data-criterion="salud"><label>Estado de Salud del Árbol</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Malo.</option><option value="1" data-level="regular">REGULAR: Comprometido.</option><option value="2" data-level="bueno">BUENO: Bueno.</option><option value="3" data-level="excelente">EXCELENTE: Propicio.</option></select></div>
+                <div class="criterion-card" data-criterion="material"><label>Cartel, tríptico o infografía</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Ambiguo.</option><option value="1" data-level="regular">REGULAR: Básico.</option><option value="2" data-level="bueno">BUENO: Relevante.</option><option value="3" data-level="excelente">EXCELENTE: Verídico.</option></select></div>
+                <div class="criterion-card" data-criterion="colaborativo"><label>Trabajo colaborativo</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: No.</option><option value="1" data-level="regular">REGULAR: Parcial.</option><option value="2" data-level="bueno">BUENO: Mayoría.</option><option value="3" data-level="excelente">EXCELENTE: Sí.</option></select></div>
+                <div class="criterion-card" data-criterion="vestimenta"><label>Vestimenta formal</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: No.</option><option value="1" data-level="regular">REGULAR: Parcial.</option><option value="2" data-level="bueno">BUENO: Mayoría.</option><option value="3" data-level="excelente">EXCELENTE: Sí.</option></select></div>
+                <div class="criterion-card" data-criterion="lenguaje"><label>Lenguaje verbal y corporal</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: No.</option><option value="1" data-level="regular">REGULAR: Parcial.</option><option value="2" data-level="bueno">BUENO: Mayoría.</option><option value="3" data-level="excelente">EXCELENTE: Adecuado.</option></select></div>
+                <div class="criterion-card" data-criterion="tiempo"><label>Tiempo de presentación</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Fuera rango.</option><option value="1" data-level="regular">REGULAR: 4-6 / 20-23.</option><option value="2" data-level="bueno">BUENO: 7-10 / 16-19.</option><option value="3" data-level="excelente">EXCELENTE: 11-15 min.</option></select></div>
+                <div class="criterion-card" data-criterion="ppt"><label>Estructura PowerPoint</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Malo.</option><option value="1" data-level="regular">REGULAR: Frecuentes.</option><option value="2" data-level="bueno">BUENO: Mínimos.</option><option value="3" data-level="excelente">EXCELENTE: Correcto.</option></select></div>
+                <div class="criterion-card" data-criterion="asistencia"><label>Puntualidad y asistencia</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: No.</option><option value="1" data-level="regular">REGULAR: Tarde.</option><option value="2" data-level="bueno">BUENO: Breve.</option><option value="3" data-level="excelente">EXCELENTE: Responsable.</option></select></div>
+                
+                <div class="criterion-card slider-section">
+                    <label for="personalSlider">Evaluación Personal de Asignatura: <span id="sliderValue">5</span> pts</label>
+                    <input type="range" id="personalSlider" min="0" max="10" step="1" value="5">
+                    <div class="slider-ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+                </div>
+            </div>
+            <div style="margin-top: 25px; margin-bottom: 15px;">
+                <button id="btnConfirmarEvaluacion" class="btn-primary" style="font-size: 1.1rem; padding: 14px;">Confirmar Evaluación</button>
+            </div>
+        </div>
+    </div>
 
-        cells.forEach(cell => {
-            cell.addEventListener('click', () => {
-                row.querySelectorAll('td').forEach(c => c.classList.remove('selected'));
-                cell.classList.add('selected');
-                scores[criterion] = parseInt(cell.getAttribute('data-value'));
-                calculateResult();
-            });
-        });
-    });
-
-    function calculateResult() {
-        let total = 0;
-        for (let key in scores) { total += scores[key]; }
+    <div id="secConsultar" class="view-section container">
+        <div class="section-header">
+            <button class="btn-back-menu">← Menú</button>
+            <h2>Consulta de Calificaciones</h2>
+        </div>
         
-        const maxPoints = Object.keys(scores).length * 3; 
-        const percent = (total / maxPoints) * 100;
-        const pondValue = (total / maxPoints) * 2.5;
+        <div class="card-box" style="margin-bottom: 20px; padding: 20px;">
+            <div class="filter-grid">
+                <div class="form-group">
+                    <label for="readSemestre">Semestre:</label>
+                    <select id="readSemestre">
+                        <option value="">Seleccione...</option>
+                        <option value="2do">2do Semestre</option>
+                        <option value="4to">4to Semestre</option>
+                        <option value="6to">6to Semestre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="readMateria">Materia:</label>
+                    <select id="readMateria" disabled>
+                        <option value="">Seleccione una materia...</option>
+                    </select>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="readGrupo">Grupo:</label>
+                    <select id="readGrupo" disabled>
+                        <option value="">Seleccione un grupo...</option>
+                    </select>
+                </div>
+            </div>
+            <button id="btnBuscarCalificaciones" class="btn-primary" style="margin-top: 15px; width: 100%;" disabled>Buscar Registros</button>
+        </div>
 
-        totalPointsElem.innerText = total;
-        totalPercentElem.innerText = percent.toFixed(0) + '%';
-        ponderacionElem.innerText = pondValue.toFixed(1);
-    }
+        <div id="loaderConsulta" class="loader-spinner" style="display: none;"></div>
+        <div id="containerResultados"></div>
+    </div>
 
-    function resetRubric() {
-        document.querySelectorAll('td.selected').forEach(cell => {
-            cell.classList.remove('selected');
-        });
-        initScores();
-        totalPointsElem.innerText = "0";
-        totalPercentElem.innerText = "0%";
-        ponderacionElem.innerText = "0.0";
-    }
+    <div id="confirmModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Confirmar Evaluación</h2>
+            <div class="confirm-summary">
+                <p><strong>Equipo:</strong> <span id="confirmEquipoText"></span></p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 12px 0;">
+                <p>Rúbrica General (Máx 6.0): <span id="confirmRubricaPond" style="font-weight: bold;">0.0</span></p>
+                <p>Evaluación Personal (Máx 4.0): <span id="confirmSliderPond" style="font-weight: bold;">0.0</span></p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 12px 0;">
+                <p style="font-size: 1.1rem; margin-bottom: 8px;"><strong>Calificación Final:</strong></p>
+                <div id="badgeCalificacion" class="score-badge"><span id="confirmCalificacionText">0.0</span> / 10</div>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                <button id="btnRegresarConfirm" class="btn-reset" style="flex: 1;">Regresar</button>
+                <button id="btnGuardarConfirm" class="btn-primary" style="flex: 1;">Confirmar</button>
+            </div>
+        </div>
+    </div>
 
-    initScores();
-</script>
+    <div id="successModal" class="modal" style="display: none;">
+        <div class="modal-content text-center">
+            <div id="modalIconContainer">
+                <div class="loader-spinner"></div>
+            </div>
+            <h2 id="modalStatusTitle" style="margin-top: 20px;">¡Evaluación Guardada!</h2>
+            <p id="modalStatusText">La calificación fue calculada y registrada correctamente.</p>
+        </div>
+    </div>
 
+    <script src="semestre2.js"></script>
+<script src="semestre4.js"></script>
+<script src="semestre6.js"></script>
+
+<script src="grupos.js"></script>
+<script src="materias.js"></script>
+<script src="alumnosEquipos.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
