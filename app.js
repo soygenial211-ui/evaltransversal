@@ -344,9 +344,12 @@ btnGuardarConfirm.addEventListener('click', () => {
 const readSemestre = document.getElementById('readSemestre');
 const readMateria = document.getElementById('readMateria');
 const readGrupo = document.getElementById('readGrupo');
+const wrapperTipoVista = document.getElementById('wrapperTipoVista'); 
 const btnBuscarCalificaciones = document.getElementById('btnBuscarCalificaciones');
 const loaderConsulta = document.getElementById('loaderConsulta');
 const containerResultados = document.getElementById('containerResultados');
+
+let datosConsultaCache = [];
 
 btnModCalificar.addEventListener('click', () => {
     menuPrincipal.style.display = 'none';
@@ -365,8 +368,9 @@ btnModConsultar.addEventListener('click', () => {
     readGrupo.innerHTML = '<option value="">Seleccione un grupo...</option>';
     readGrupo.disabled = true;
     btnBuscarCalificaciones.disabled = true;
+    // --- AGREGAR ESTA LÍNEA ---
+    document.querySelector('input[name="tipoVistaConsulta"][value="equipos"]').checked = true; 
 });
-
 document.querySelectorAll('.btn-back-menu').forEach(btn => {
     btn.addEventListener('click', () => {
         secCalificar.classList.remove('active');
@@ -378,6 +382,7 @@ document.querySelectorAll('.btn-back-menu').forEach(btn => {
 
 // Cascadas para selectores del área de Consulta con limpieza automática
 readSemestre.addEventListener('change', () => {
+    datosConsultaCache = [];
     const sem = readSemestre.value;
     readMateria.innerHTML = '<option value="">Seleccione una materia...</option>';
     readGrupo.innerHTML = '<option value="">Seleccione un grupo...</option>';
@@ -396,6 +401,7 @@ readSemestre.addEventListener('change', () => {
 });
 
 readMateria.addEventListener('change', () => {
+    datosConsultaCache = [];
     const sem = readSemestre.value;
     readGrupo.innerHTML = '<option value="">Seleccione un grupo...</option>';
     readGrupo.disabled = true;
@@ -414,6 +420,7 @@ readMateria.addEventListener('change', () => {
 readGrupo.addEventListener('change', () => {
     btnBuscarCalificaciones.disabled = !readGrupo.value;
     containerResultados.innerHTML = "";
+    datosConsultaCache = []; // <-- Agregar esta línea para mantener consistencia
 });
 
 // Petición HTTP GET para Consultar Calificaciones
@@ -443,14 +450,12 @@ btnBuscarCalificaciones.addEventListener('click', () => {
             const leyendExistente = document.getElementById('leyendaCargando');
             if (leyendExistente) leyendExistente.remove();
 
+            // --- REEMPLAZAR DESDE AQUÍ ---
             if (data.status === "success" && data.data.length > 0) {
-                const filtradosPorMateria = data.data.filter(item => item.materia === materia);
-                if (filtradosPorMateria.length > 0) {
-                    renderizarCalificaciones(filtradosPorMateria);
-                } else {
-                    containerResultados.innerHTML = `<p style="text-align:center; color: #64748b; margin-top:20px; font-size:0.95rem;">No se encontraron evaluaciones registradas para esta materia.</p>`;
-                }
+                datosConsultaCache = data.data; // Guardar en caché global
+                ejecutarFiltroYRenderizado();    // Llamar a la función de renderizado
             } else {
+                datosConsultaCache = [];
                 containerResultados.innerHTML = `<p style="text-align:center; color: #64748b; margin-top:20px; font-size:0.95rem;">No se encontraron evaluaciones registradas para estos criterios.</p>`;
             }
         })
@@ -527,3 +532,108 @@ function renderizarCalificaciones(lista) {
 
 // Inicializar ejecución limpia al cargar
 initScores();
+
+// Nueva función para renderizar el listado ordenado alfabéticamente por alumnos individuales
+function renderizarCalificacionesPorAlumnos(lista) {
+    const grupoActualConsulta = readGrupo.value;
+    const dicEquipos = equiposPorGrupo[grupoActualConsulta] || {};
+    let listaAlumnosDesagregados = [];
+
+    // Desglosar las notas de los equipos hacia cada uno de sus integrantes correspondientes
+    lista.forEach(item => {
+        const alumnosEquipo = dicEquipos[item.equipo] || [];
+        alumnosEquipo.forEach(alumno => {
+            listaAlumnosDesagregados.push({
+                nombre: alumno,
+                notaFinal: parseFloat(item.notaFinal).toFixed(1),
+                detalles: item,
+                sliderValue: item.sliderValue
+            });
+        });
+    });
+
+    // Ordenar alfabéticamente de la A a la Z por el nombre del estudiante
+    listaAlumnosDesagregados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+    // Renderizar la interfaz individualizada
+    listaAlumnosDesagregados.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = "card-view";
+        
+        card.innerHTML = `
+            <div class="card-header-view">
+                <div style="flex: 1; padding-right: 8px;">
+                    <h3 style="margin:0 0 4px 0; color: var(--text-main); font-size:1.05rem; font-weight: 600;">${item.nombre}</h3>
+                </div>
+                <div style="text-align: right; display:flex; flex-direction: column; align-items: flex-end; gap: 8px; justify-content: flex-start;">
+                    <span class="score-badge" style="margin:0; font-size: 1.1rem; background: #f1f5f9; color: #2563eb;">${item.notaFinal}</span>
+                    <button class="btn-navigation btn-details" data-target="details-alumno-${index}" style="padding: 4px 10px; font-size:0.8rem; margin:0; width:max-content;">Detalles</button>
+                </div>
+            </div>
+            <div id="details-alumno-${index}" class="details-grid" style="display: none;">
+                <div class="detail-item"><strong>Bitácora:</strong> ${item.detalles.bitacora} pts</div>
+                <div class="detail-item"><strong>Redacción:</strong> ${item.detalles.redaccion} pts</div>
+                <div class="detail-item"><strong>Contenido:</strong> ${item.detalles.contenido} pts</div>
+                <div class="detail-item"><strong>Salud Árbol:</strong> ${item.detalles.salud} pts</div>
+                <div class="detail-item"><strong>Material:</strong> ${item.detalles.material} pts</div>
+                <div class="detail-item"><strong>Colaborativo:</strong> ${item.detalles.colaborativo} pts</div>
+                <div class="detail-item"><strong>Vestimenta:</strong> ${item.detalles.vestimenta} pts</div>
+                <div class="detail-item"><strong>Lenguaje:</strong> ${item.detalles.lenguaje} pts</div>
+                <div class="detail-item"><strong>Tiempo:</strong> ${item.detalles.tiempo} pts</div>
+                <div class="detail-item"><strong>PowerPoint:</strong> ${item.detalles.ppt} pts</div>
+                <div class="detail-item"><strong>Asistencia:</strong> ${item.detalles.asistencia} pts</div>
+                <div class="detail-item" style="grid-column: 1 / -1; border-top: 1px dashed #cbd5e1; padding-top: 6px; margin-top: 4px; font-weight:600;">
+                    Asignatura (Slider): ${item.sliderValue} / 10
+                </div>
+            </div>
+        `;
+        containerResultados.appendChild(card);
+    });
+
+    // Delegar manejadores de eventos funcionales para los botones colapsables de detalles individuales
+    containerResultados.querySelectorAll('.btn-details').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const targetId = e.target.getAttribute('data-target');
+            const targetDiv = document.getElementById(targetId);
+            if (targetDiv.style.display === "none") {
+                targetDiv.style.display = "grid";
+                e.target.innerText = "Ocultar";
+                e.target.style.backgroundColor = "#cbd5e1";
+            } else {
+                targetDiv.style.display = "none";
+                e.target.innerText = "Detalles";
+                e.target.style.backgroundColor = "#e2e8f0";
+            }
+        });
+    });
+}
+
+// Función para procesar los datos del caché y renderizar según la vista seleccionada
+function ejecutarFiltroYRenderizado() {
+    const materia = readMateria.value;
+    containerResultados.innerHTML = "";
+
+    if (datosConsultaCache.length === 0) return;
+
+    const filtradosPorMateria = datosConsultaCache.filter(item => item.materia === materia);
+    
+    if (filtradosPorMateria.length > 0) {
+        const tipoVista = document.querySelector('input[name="tipoVistaConsulta"]:checked').value;
+        if (tipoVista === "alumnos") {
+            renderizarCalificacionesPorAlumnos(filtradosPorMateria);
+        } else {
+            renderizarCalificaciones(filtradosPorMateria);
+        }
+    } else {
+        containerResultados.innerHTML = `<p style="text-align:center; color: #64748b; margin-top:20px; font-size:0.95rem;">No se encontraron evaluaciones registradas para esta materia.</p>`;
+    }
+}
+
+// Escuchar cambios en los interruptores de tipo de vista para actualizar al instante
+document.querySelectorAll('input[name="tipoVistaConsulta"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        if (datosConsultaCache.length > 0) {
+            ejecutarFiltroYRenderizado();
+        }
+    });
+});
