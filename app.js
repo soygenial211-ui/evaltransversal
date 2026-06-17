@@ -79,13 +79,27 @@ criterionCards.forEach(card => {
     select.addEventListener('change', () => {
         const selectedOption = select.options[select.selectedIndex];
         const val = parseInt(selectedOption.value);
-        const level = selectedOption.getAttribute('data-level');
 
+        // Determinar la clase de nivel basada en el valor numérico (3, 2, 1, 0)
+        let level = "";
+        if (val === 3) level = "excelente";
+        else if (val === 2) level = "bueno";
+        else if (val === 1) level = "regular";
+        else if (val === 0) level = "insuficiente";
+
+        // Limpiar clases previas y añadir la nueva correspondiente
         card.className = "criterion-card";
         if (level) card.classList.add(level);
 
         scores[criterion] = val;
     });
+});
+
+// Dentro de la lógica de limpieza/reinicio de criterios:
+criterionCards.forEach(card => {
+    const select = card.querySelector('.criterion-select');
+    select.value = ""; // O tu valor por defecto para deseleccionar
+    card.className = "criterion-card"; // Quita las clases excelente, bueno, etc.
 });
 
 // Listener para actualización del texto del Slider personalizado
@@ -224,14 +238,14 @@ btnConfirmarEvaluacion.addEventListener('click', () => {
     confirmCalificacionText.innerText = notaFinal.toFixed(1);
 
     badgeCalificacion.className = "score-badge";
-    if (notaFinal < 6.0) {
-        badgeCalificacion.classList.add("badge-insuficiente");
-    } else if (notaFinal >= 6.0 && notaFinal < 8.0) {
-        badgeCalificacion.classList.add("badge-regular");
-    } else if (notaFinal >= 8.0 && notaFinal < 9.5) {
-        badgeCalificacion.classList.add("badge-bueno");
+    if (notaFinal === 10.0) {
+        badgeCalificacion.classList.add("badge-perfecto");
+    } else if (notaFinal >= 8.0 && notaFinal <= 9.9) {
+        badgeCalificacion.classList.add("badge-alto");
+    } else if (notaFinal >= 6.0 && notaFinal <= 7.9) {
+        badgeCalificacion.classList.add("badge-medio");
     } else {
-        badgeCalificacion.classList.add("badge-excelente");
+        badgeCalificacion.classList.add("badge-bajo");
     }
 
     confirmModal.style.display = 'flex';
@@ -480,6 +494,14 @@ function renderizarCalificaciones(lista) {
         const alumnosEquipo = dicEquipos[item.equipo] || [];
         const listaAlumnosTexto = alumnosEquipo.length > 0 ? alumnosEquipo.join(', ') : "No especificados";
 
+        // --- LÓGICA DE COLOR DINÁMICO ---
+        const nota = parseFloat(item.notaFinal);
+        let estiloBadge = "";
+        if (nota === 10.0) estiloBadge = "background-color: #00e676; color: #000000;";
+        else if (nota >= 8.0 && nota <= 9.9) estiloBadge = "background-color: #aeea00; color: #000000;";
+        else if (nota >= 6.0 && nota <= 7.9) estiloBadge = "background-color: #ffb300; color: #000000;";
+        else estiloBadge = "background-color: #f44336; color: #ffffff;";
+
         card.innerHTML = `
             <div class="card-header-view">
                 <div style="flex: 1; padding-right: 8px;">
@@ -489,7 +511,7 @@ function renderizarCalificaciones(lista) {
                     </div>
                 </div>
                 <div style="text-align: right; display:flex; flex-direction: column; align-items: flex-end; gap: 8px; justify-content: flex-start;">
-                    <span class="score-badge" style="margin:0; font-size: 1.1rem; background: #f1f5f9; color: #2563eb;">${parseFloat(item.notaFinal).toFixed(1)}</span>
+                    <span class="score-badge" style="margin:0; font-size: 1.1rem; ${estiloBadge}">${nota.toFixed(1)}</span>
                     <button class="btn-navigation btn-details" data-target="details-${index}" style="padding: 4px 10px; font-size:0.8rem; margin:0; width:max-content;">Detalles</button>
                 </div>
             </div>
@@ -560,13 +582,21 @@ function renderizarCalificacionesPorAlumnos(lista) {
         const card = document.createElement('div');
         card.className = "card-view";
         
+        // --- LÓGICA DE COLOR DINÁMICO PARA ALUMNOS ---
+        const notaAlumno = parseFloat(item.notaFinal);
+        let estiloBadgeAlumno = "";
+        if (notaAlumno === 10.0) estiloBadgeAlumno = "background-color: #00e676; color: #000000;";
+        else if (notaAlumno >= 8.0 && notaAlumno <= 9.9) estiloBadgeAlumno = "background-color: #aeea00; color: #000000;";
+        else if (notaAlumno >= 6.0 && notaAlumno <= 7.9) estiloBadgeAlumno = "background-color: #ffb300; color: #000000;";
+        else estiloBadgeAlumno = "background-color: #f44336; color: #ffffff;";
+
         card.innerHTML = `
             <div class="card-header-view">
                 <div style="flex: 1; padding-right: 8px;">
                     <h3 style="margin:0 0 4px 0; color: var(--text-main); font-size:1.05rem; font-weight: 600;">${item.nombre}</h3>
                 </div>
                 <div style="text-align: right; display:flex; flex-direction: column; align-items: flex-end; gap: 8px; justify-content: flex-start;">
-                    <span class="score-badge" style="margin:0; font-size: 1.1rem; background: #f1f5f9; color: #2563eb;">${item.notaFinal}</span>
+                    <span class="score-badge" style="margin:0; font-size: 1.1rem; ${estiloBadgeAlumno}">${notaAlumno.toFixed(1)}</span>
                     <button class="btn-navigation btn-details" data-target="details-alumno-${index}" style="padding: 4px 10px; font-size:0.8rem; margin:0; width:max-content;">Detalles</button>
                 </div>
             </div>
@@ -607,7 +637,6 @@ function renderizarCalificacionesPorAlumnos(lista) {
         });
     });
 }
-
 // Función para procesar los datos del caché y renderizar según la vista seleccionada
 function ejecutarFiltroYRenderizado() {
     const materia = readMateria.value;
