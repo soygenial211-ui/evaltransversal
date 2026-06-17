@@ -6,16 +6,15 @@
     --text-main: #334155;
     --reset-color: #e74c3c;
     
-    /* Colores de niveles de la rúbrica */
-    --color-excelente: #27ae60;
-    --color-bueno: #f1c40f;
-    --color-regular: #e67e22;
-    --color-insuficiente: #e74c3c;
+    --color-excelente: #00e676;       /* Verde fuerte brilloso */
+    --color-bueno: #aeea00;           /* Verde tirando a amarillo */
+    --color-regular: #ffb300;         /* Amarillo tirando a naranja */
+    --color-insuficiente: #f44336;     /* Rojo */
     
-    --bg-excelente: #e8f6ef;
-    --bg-bueno: #fef9e7;
-    --bg-regular: #fdf2e9;
-    --bg-insuficiente: #fdedec;
+    --bg-excelente: #d4fcd6;
+    --bg-bueno: #f4fcd4;
+    --bg-regular: #fff1d4;
+    --bg-insuficiente: #fcd4d4;
 }
 
 *, *::before, *::after {
@@ -236,13 +235,18 @@ select:disabled {
     font-size: 0.95rem;
 }
 
-/* Colores de nivel dinámicos aplicados por JS */
+/* Colores de nivel dinámicos unificados con tonos tenues */
 .excelente { background-color: var(--bg-excelente); border-color: var(--color-excelente); }
-.bueno { background-color: var(--bg-bueno); border-color: var(--color-bueno); }
-.regular { background-color: var(--bg-regular); border-color: var(--color-regular); }
-.insuficiente { background-color: var(--bg-insuficiente); border-color: var(--color-insuficiente); }
+.excelente select { background-color: var(--bg-excelente); color: #000000; font-weight: bold; }
 
-/* Sliders */
+.bueno { background-color: var(--bg-bueno); border-color: var(--color-bueno); }
+.bueno select { background-color: var(--bg-bueno); color: #000000; font-weight: bold; }
+
+.regular { background-color: var(--bg-regular); border-color: var(--color-regular); }
+.regular select { background-color: var(--bg-regular); color: #000000; font-weight: bold; }
+
+.insuficiente { background-color: var(--bg-insuficiente); border-color: var(--color-insuficiente); }
+.insuficiente select { background-color: var(--bg-insuficiente); color: #b71c1c; font-weight: bold; }
 .slider-section input[type="range"] {
     width: 100%;
     margin: 10px 0;
@@ -335,11 +339,10 @@ select:disabled {
     margin-top: 4px;
 }
 
-.badge-insuficiente { background-color: var(--bg-insuficiente); color: var(--color-insuficiente); }
-.badge-regular { background-color: var(--bg-regular); color: var(--color-regular); }
-.badge-bueno { background-color: var(--bg-bueno); color: var(--color-bueno); }
-.badge-excelente { background-color: var(--bg-excelente); color: var(--color-excelente); }
-
+.badge-perfecto { background-color: #00e676 !important; color: #000000 !important; }
+.badge-alto { background-color: #aeea00 !important; color: #000000 !important; }
+.badge-medio { background-color: #ffb300 !important; color: #000000 !important; }
+.badge-bajo { background-color: #f44336 !important; color: #ffffff !important; }
 /* Loader Spinners */
 .loader-spinner {
     border: 4px solid #f3f3f3;
