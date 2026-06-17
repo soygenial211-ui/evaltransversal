@@ -1,0 +1,373 @@
+:root {
+    --primary-color: #2c3e50;
+    --accent-color: #27ae60;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #334155;
+    --reset-color: #e74c3c;
+    
+    /* Colores de niveles de la rúbrica */
+    --color-excelente: #27ae60;
+    --color-bueno: #f1c40f;
+    --color-regular: #e67e22;
+    --color-insuficiente: #e74c3c;
+    
+    --bg-excelente: #e8f6ef;
+    --bg-bueno: #fef9e7;
+    --bg-regular: #fdf2e9;
+    --bg-insuficiente: #fdedec;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Contenedores Base */
+.container, .card-box {
+    width: 100%;
+    max-width: 700px;
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 16px;
+}
+
+.view-section {
+    display: none;
+    width: 100%;
+    max-width: 700px;
+}
+
+.view-section.active {
+    display: block;
+}
+
+/* Pantalla de Inicio / Menú de Bienvenida */
+.welcome-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    padding: 40px 16px;
+    margin-top: 10vh;
+}
+
+.welcome-container h1 {
+    color: var(--primary-color);
+    margin-bottom: 4px;
+    font-size: 2rem;
+}
+
+.welcome-container p {
+    color: #64748b;
+    margin-bottom: 30px;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    width: 100%;
+}
+
+.menu-card {
+    background: var(--card-bg);
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.25s ease;
+}
+
+.menu-card:hover, .menu-card:active {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.btn-calificar:hover, .btn-calificar:active { border-color: var(--accent-color); }
+.btn-consultar:hover, .btn-consultar:active { border-color: #3b82f6; }
+
+.menu-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+}
+
+.menu-card h3 {
+    margin: 0 0 6px 0;
+    color: var(--primary-color);
+    font-size: 1.25rem;
+}
+
+.menu-card small {
+    color: #64748b;
+    font-size: 0.88rem;
+}
+
+/* Cabeceras de Sección e Interfaz */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 12px;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--primary-color);
+}
+
+#subTitle {
+    background: #f1f5f9;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 16px;
+}
+
+/* Formularios y Selectores */
+.form-group {
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background-color: #fff;
+    color: var(--text-main);
+    transition: border-color 0.2s;
+    outline: none;
+}
+
+select:focus {
+    border-color: #3b82f6;
+}
+
+select:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* Botones */
+.btn-primary, .btn-back-menu, .btn-navigation, .btn-reset {
+    font-family: inherit;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    text-align: center;
+}
+
+.btn-primary {
+    width: 100%;
+    background-color: var(--accent-color);
+    color: white;
+    padding: 12px;
+    font-size: 1rem;
+}
+
+.btn-primary:disabled {
+    background-color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.btn-back-menu, .btn-navigation {
+    background-color: #e2e8f0;
+    color: var(--primary-color);
+    padding: 8px 14px;
+    font-size: 0.9rem;
+}
+
+.btn-reset {
+    background-color: var(--reset-color);
+    color: white;
+    padding: 12px;
+}
+
+/* Tarjetas de Criterios (Rúbrica) */
+.criterion-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.criterion-card label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: var(--primary-color);
+    font-size: 0.95rem;
+}
+
+/* Colores de nivel dinámicos aplicados por JS */
+.excelente { background-color: var(--bg-excelente); border-color: var(--color-excelente); }
+.bueno { background-color: var(--bg-bueno); border-color: var(--color-bueno); }
+.regular { background-color: var(--bg-regular); border-color: var(--color-regular); }
+.insuficiente { background-color: var(--bg-insuficiente); border-color: var(--color-insuficiente); }
+
+/* Sliders */
+.slider-section input[type="range"] {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.slider-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #64748b;
+    padding: 0 4px;
+}
+
+/* Módulo de Consulta (Tarjetas de Resultados) */
+.filter-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.card-view {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    border: 1px solid #e2e8f0;
+}
+
+.card-header-view {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 14px;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px dashed #cbd5e1;
+}
+
+.detail-item {
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+/* Modales */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    padding: 16px;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.confirm-summary {
+    background-color: #f8fafc;
+    padding: 14px;
+    border-radius: 8px;
+    margin-top: 12px;
+}
+
+.score-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-top: 4px;
+}
+
+.badge-insuficiente { background-color: var(--bg-insuficiente); color: var(--color-insuficiente); }
+.badge-regular { background-color: var(--bg-regular); color: var(--color-regular); }
+.badge-bueno { background-color: var(--bg-bueno); color: var(--color-bueno); }
+.badge-excelente { background-color: var(--bg-excelente); color: var(--color-excelente); }
+
+/* Loader Spinners */
+.loader-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    animation: spin-loader 0.8s linear infinite;
+    margin: 24px auto;
+}
+
+@keyframes spin-loader {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Animación de Éxito CSS */
+.success-checkmark { width: 80px; height: 80px; margin: 0 auto; }
+.success-checkmark .check-icon { width: 80px; height: 80px; position: relative; border-radius: 50%; border: 4px solid #4CAF50; }
+.success-checkmark .check-icon .icon-line { height: 5px; background-color: #4CAF50; display: block; border-radius: 2px; position: absolute; z-index: 10; }
+.success-checkmark .check-icon .icon-line.line-tip { width: 25px; left: 14px; top: 45px; transform: rotate(45deg); }
+.success-checkmark .check-icon .icon-line.line-long { width: 47px; right: 8px; top: 38px; transform: rotate(-45deg); }
+
+/* DISEÑO RESPONSIVO MÓVIL (PANTALLAS MEDIANAS Y GRANDES) */
+@media (min-width: 480px) {
+    body { padding: 24px; }
+    .filter-grid { grid-template-columns: 1fr 1fr; }
+    .menu-grid { grid-template-columns: 1fr 1fr; }
+    .details-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+    .welcome-container h1 { font-size: 2.5rem; }
+}

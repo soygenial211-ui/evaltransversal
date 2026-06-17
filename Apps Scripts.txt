@@ -1,0 +1,105 @@
+function doPost(e) {
+  try {
+    var jsonString = e.postData.contents; 
+    var data = JSON.parse(jsonString); 
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    if (sheet.getLastRow() === 0) { 
+      sheet.appendRow([ 
+        "Fecha/Hora", "Semestre", "Materia", "Grupo", "Equipo", 
+        "Bitácora", "Redacción", "Contenido", "Salud Árbol", 
+        "Material", "Colaborativo", "Vestimenta", "Lenguaje", 
+        "Tiempo", "PowerPoint", "Asistencia", "Slider Asignatura", "Nota Final"
+      ]); 
+    } 
+    
+    var bitacora = data.scores.bitacora !== undefined ? data.scores.bitacora : ""; 
+    var redaccion = data.scores.redaccion !== undefined ? data.scores.redaccion : "";
+    var contenido = data.scores.contenido !== undefined ? data.scores.contenido : ""; 
+    var salud = data.scores.salud !== undefined ? data.scores.salud : "";
+    var material = data.scores.material !== undefined ? data.scores.material : ""; 
+    var colaborativo = data.scores.colaborativo !== undefined ? data.scores.colaborativo : "";
+    var vestimenta = data.scores.vestimenta !== undefined ? data.scores.vestimenta : ""; 
+    var lenguaje = data.scores.lenguaje !== undefined ? data.scores.lenguaje : "";
+    var tiempo = data.scores.tiempo !== undefined ? data.scores.tiempo : ""; 
+    var ppt = data.scores.ppt !== undefined ? data.scores.ppt : "";
+    var asistencia = data.scores.asistencia !== undefined ? data.scores.asistencia : ""; 
+    
+    sheet.appendRow([ 
+      new Date(), data.semestre, data.materia, data.grupo, data.equipo,
+      bitacora, redaccion, contenido, salud, material, colaborativo, vestimenta, lenguaje, tiempo,
+      ppt, asistencia, data.sliderValue, data.notaFinal
+    ]); 
+    
+    return ContentService.createTextOutput(JSON.stringify({ "status": "success" })) 
+                         .setMimeType(ContentService.MimeType.JSON); 
+  } catch (error) { 
+    return ContentService.createTextOutput(JSON.stringify({ "status": "error", "message": error.toString() })) 
+                         .setMimeType(ContentService.MimeType.JSON);
+  } 
+}
+
+
+
+// NUEVA FUNCIÓN: Permite leer el archivo de Excel y filtrar por Semestre y Grupo
+function doGet(e) {
+  try {
+    // Asegurar que los filtros sean tratados como texto limpio y sin espacios
+    var semFiltro = e.parameter.semestre ? e.parameter.semestre.toString().trim() : "";
+    var grupoFiltro = e.parameter.grupo ? e.parameter.grupo.toString().trim() : "";
+    
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var rows = sheet.getDataRange().getValues();
+    
+    var resultados = [];
+    
+    // Recorrer desde la fila 2 (evitando encabezados)
+    for (var i = 1; i < rows.length; i++) {
+      var row = rows[i];
+      
+      // Validar que existan datos en las celdas antes de transformarlos
+      var semCelda = row[1] !== undefined && row[1] !== null ? row[1].toString().trim() : "";
+      var grupoCelda = row[3] !== undefined && row[3] !== null ? row[3].toString().trim() : "";
+      
+      // Comparación normalizada en formato Texto
+      if (semCelda === semFiltro && grupoCelda === grupoFiltro) {
+        
+        // Formatear la fecha para la visualización web
+        var fechaFormato = "";
+        if(row[0] instanceof Date){
+           fechaFormato = Utilities.formatDate(row[0], Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+        } else {
+           fechaFormato = row[0].toString();
+        }
+
+        resultados.push({
+          "fechaHora": fechaFormato,
+          "semestre": row[1],
+          "materia": row[2],
+          "grupo": row[3],
+          "equipo": row[4],
+          "bitacora": row[5],
+          "redaccion": row[6],
+          "contenido": row[7],
+          "salud": row[8],
+          "material": row[9],
+          "colaborativo": row[10],
+          "vestimenta": row[11],
+          "lenguaje": row[12],
+          "tiempo": row[13],
+          "ppt": row[14],
+          "asistencia": row[15],
+          "sliderValue": row[16],
+          "notaFinal": row[17]
+        });
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({ "status": "success", "data": resultados }))
+                         .setMimeType(ContentService.MimeType.JSON);
+                         
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ "status": "error", "message": error.toString() }))
+                         .setMimeType(ContentService.MimeType.JSON);
+  }
+}
