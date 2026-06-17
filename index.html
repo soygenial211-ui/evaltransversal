@@ -76,18 +76,85 @@
             <h3 id="subTitle"></h3>
             
             <div id="rubricForm" class="rubric-form">
-                <div class="criterion-card" data-criterion="bitacora"><label>Registros en Bitácora</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Menos de 15 registros.</option><option value="1" data-level="regular">REGULAR: Al menos 15 registros.</option><option value="2" data-level="bueno">BUENO: Al menos 20 registros.</option><option value="3" data-level="excelente">EXCELENTE: Al menos 25 registros.</option></select></div>
-                <div class="criterion-card" data-criterion="redaccion"><label>Redacción y Estructura</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Deficiente.</option><option value="1" data-level="regular">REGULAR: Parcial.</option><option value="2" data-level="bueno">BUENO: Mínimos errores.</option><option value="3" data-level="excelente">EXCELENTE: Clara.</option></select></div>
-                <div class="criterion-card" data-criterion="contenido"><label>Contenido de la bitácora</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Menos de 3.</option><option value="1" data-level="regular">REGULAR: Al menos 3.</option><option value="2" data-level="bueno">BUENO: Al menos 4.</option><option value="3" data-level="excelente">EXCELENTE: 6 elementos.</option></select></div>
-                <div class="criterion-card" data-criterion="salud"><label>Estado de Salud del Árbol</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Malo.</option><option value="1" data-level="regular">REGULAR: Comprometido.</option><option value="2" data-level="bueno">BUENO: Bueno.</option><option value="3" data-level="excelente">EXCELENTE: Propicio.</option></select></div>
-                <div class="criterion-card" data-criterion="material"><label>Cartel, tríptico o infografía</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Ambiguo.</option><option value="1" data-level="regular">REGULAR: Básico.</option><option value="2" data-level="bueno">BUENO: Relevante.</option><option value="3" data-level="excelente">EXCELENTE: Verídico.</option></select></div>
-                <div class="criterion-card" data-criterion="colaborativo"><label>Trabajo colaborativo</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: No.</option><option value="1" data-level="regular">REGULAR: Parcial.</option><option value="2" data-level="bueno">BUENO: Mayoría.</option><option value="3" data-level="excelente">EXCELENTE: Sí.</option></select></div>
-                <div class="criterion-card" data-criterion="vestimenta"><label>Vestimenta formal</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: No.</option><option value="1" data-level="regular">REGULAR: Parcial.</option><option value="2" data-level="bueno">BUENO: Mayoría.</option><option value="3" data-level="excelente">EXCELENTE: Sí.</option></select></div>
-                <div class="criterion-card" data-criterion="lenguaje"><label>Lenguaje verbal y corporal</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: No.</option><option value="1" data-level="regular">REGULAR: Parcial.</option><option value="2" data-level="bueno">BUENO: Mayoría.</option><option value="3" data-level="excelente">EXCELENTE: Adecuado.</option></select></div>
-                <div class="criterion-card" data-criterion="tiempo"><label>Tiempo de presentación</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Fuera rango.</option><option value="1" data-level="regular">REGULAR: 4-6 / 20-23.</option><option value="2" data-level="bueno">BUENO: 7-10 / 16-19.</option><option value="3" data-level="excelente">EXCELENTE: 11-15 min.</option></select></div>
-                <div class="criterion-card" data-criterion="ppt"><label>Estructura PowerPoint</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: Malo.</option><option value="1" data-level="regular">REGULAR: Frecuentes.</option><option value="2" data-level="bueno">BUENO: Mínimos.</option><option value="3" data-level="excelente">EXCELENTE: Correcto.</option></select></div>
-                <div class="criterion-card" data-criterion="asistencia"><label>Puntualidad y asistencia</label><select class="criterion-select"><option value="0" data-level="insuficiente">INSUFICIENTE: No.</option><option value="1" data-level="regular">REGULAR: Tarde.</option><option value="2" data-level="bueno">BUENO: Breve.</option><option value="3" data-level="excelente">EXCELENTE: Responsable.</option></select></div>
-                
+                <div id="rubricForm" class="rubric-form">
+    <div class="criterion-card" data-criterion="bitacora"><label>Registros en Bitácora</label><select class="criterion-select">
+        <option value="3">EXCELENTE: 25 registros o más.</option>
+        <option value="2">BUENO: Al menos 20 registros.</option>
+        <option value="1">REGULAR: Al menos 15 registros.</option>
+        <option value="0">INSUFICIENTE: Menos de 15 registros.</option>
+    </select></div>
+
+    <div class="criterion-card" data-criterion="redaccion"><label>Redacción y Estructura</label><select class="criterion-select">
+        <option value="3">EXCELENTE: Clara y con todos los elementos.</option>
+        <option value="2">BUENO: Clara y estructurada, mínimos errores.</option>
+        <option value="1">REGULAR: Parcial, errores frecuentes.</option>
+        <option value="0">INSUFICIENTE: Deficiente estructura y ortografía.</option>
+    </select></div>
+
+    <div class="criterion-card" data-criterion="contenido"><label>Contenido de la bitácora</label><select class="criterion-select">
+        <option value="3">EXCELENTE: Integra 6 elementos.</option>
+        <option value="2">BUENO: Integra 4 elementos.</option>
+        <option value="1">REGULAR: Integra 3 elementos.</option>
+        <option value="0">INSUFICIENTE: Menos de 3 elementos.</option>
+    </select></div>
+
+    <div class="criterion-card" data-criterion="salud"><label>Estado de Salud del Árbol</label><select class="criterion-select">
+        <option value="3">EXCELENTE: Condiciones propicias.</option>
+        <option value="2">BUENO: Salud buena, futuro estable.</option>
+        <option value="1">REGULAR: Salud comprometida.</option>
+        <option value="0">INSUFICIENTE: Estado deplorable o sin vida.</option>
+    </select></div>
+
+    <div class="criterion-card" data-criterion="material"><label>Cartel, tríptico o infografía</label><select class="criterion-select">
+        <option value="3">EXCELENTE: Información verídica y persuasiva.</option>
+        <option value="2">BUENO: Relevante pero no trasciende.</option>
+        <option value="1">REGULAR: Información básica y obvia.</option>
+        <option value="0">INSUFICIENTE: Información ambigua o inexistente.</option>
+    </select></div>
+
+    <div class="criterion-card" data-criterion="colaborativo"><label>Trabajo colaborativo</label><select class="criterion-select">
+        <option value="3">EXCELENTE: Trabajo totalmente colaborativo.</option>
+        <option value="2">BUENO: Mayoría trabaja colaborativamente.</option>
+        <option value="1">REGULAR: Parcialmente colaborativo.</option>
+        <option value="0">INSUFICIENTE: No trabajan colaborativamente.</option>
+    </select></div>
+
+    <div class="criterion-card" data-criterion="vestimenta"><label>Vestimenta formal</label><select class="criterion-select">
+        <option value="3">EXCELENTE: Cumple totalmente.</option>
+        <option value="2">BUENO: Cumple en su mayoría.</option>
+        <option value="1">REGULAR: Cumple parcialmente.</option>
+        <option value="0">INSUFICIENTE: No cumple.</option>
+    </select></div>
+
+    <div class="criterion-card" data-criterion="lenguaje"><label>Lenguaje verbal y corporal</label><select class="criterion-select">
+        <option value="3">EXCELENTE: Adecuado.</option>
+        <option value="2">BUENO: Mayoría adecuado.</option>
+        <option value="1">REGULAR: Parcialmente adecuado.</option>
+        <option value="0">INSUFICIENTE: No es adecuado.</option>
+    </select></div>
+
+    <div class="criterion-card" data-criterion="tiempo"><label>Tiempo de presentación</label><select class="criterion-select">
+        <option value="3">EXCELENTE: 11-15 minutos.</option>
+        <option value="2">BUENO: 7-10 o 16-19 minutos.</option>
+        <option value="1">REGULAR: 4-6 o 20-23 minutos.</option>
+        <option value="0">INSUFICIENTE: Menos de 4 o más de 23 minutos.</option>
+    </select></div>
+
+    <div class="criterion-card" data-criterion="ppt"><label>Estructura PowerPoint</label><select class="criterion-select">
+        <option value="3">EXCELENTE: Destacable, sin errores.</option>
+        <option value="2">BUENO: Mínimos errores, claro.</option>
+        <option value="1">REGULAR: Deficiente, errores frecuentes.</option>
+        <option value="0">INSUFICIENTE: Muy deficiente, ilegible.</option>
+    </select></div>
+
+    <div class="criterion-card" data-criterion="asistencia"><label>Puntualidad y asistencia</label><select class="criterion-select">
+        <option value="3">EXCELENTE: Puntual y responsable.</option>
+        <option value="2">BUENO: Puntual, participación breve.</option>
+        <option value="1">REGULAR: Llega tarde, poca participación.</option>
+        <option value="0">INSUFICIENTE: No asiste.</option>
+    </select></div>
+    
+    </div>
                 <div class="criterion-card slider-section">
                     <label for="personalSlider">Evaluación Personal de Asignatura: <span id="sliderValue">5</span> pts</label>
                     <input type="range" id="personalSlider" min="0" max="10" step="1" value="5">
