@@ -1,139 +1,158 @@
 const fuentesGrupos = gruposPorSemestre;
 
-// Contenedores de Navegación de Flujo Principal
-const menuPrincipal = document.getElementById('menuPrincipal');
-const btnModCalificar = document.getElementById('btnModCalificar');
-const btnModConsultar = document.getElementById('btnModConsultar');
-const secCalificar = document.getElementById('secCalificar');
-const secConsultar = document.getElementById('secConsultar');
+// ── URLs ─────────────────────────────────────────────────────────────────────
+// Apps Script de ESTE proyecto (Eval Transversal) — donde se guardan y leen las notas individuales
+const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxex8Wmr0FjnsVDeS9NRncbTTpkvj6xD3gojsM_AO4wgam8ew6tvpM0FOW87uEKXD-_Mw/exec";
 
-// Modales del DOM
-const initialModal = document.getElementById('initialModal');
-const confirmModal = document.getElementById('confirmModal');
-const successModal = document.getElementById('successModal');
-
-// Selectores del Modal Inicial
-const modalSemestre = document.getElementById('modalSemestre');
-const modalMateria = document.getElementById('modalMateria');
-const modalGrupo = document.getElementById('modalGrupo');
-const modalEquipo = document.getElementById('modalEquipo');
-const btnIniciar = document.getElementById('btnIniciar');
-
-// Referencias a la UI de integrantes en el modal de configuración
-const integrantesContainer = document.getElementById('integrantesContainer');
-const listaIntegrantesTexto = document.getElementById('listaIntegrantesTexto');
-
-// Contenedores Principales de Interfaz
-const mainContainer = document.getElementById('mainContainer');
-const subTitle = document.getElementById('subTitle');
-const btnCambiarEquipo = document.getElementById('btnCambiarEquipo');
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const menuPrincipal          = document.getElementById('menuPrincipal');
+const btnModCalificar        = document.getElementById('btnModCalificar');
+const btnModConsultar        = document.getElementById('btnModConsultar');
+const secCalificar           = document.getElementById('secCalificar');
+const secConsultar           = document.getElementById('secConsultar');
+const initialModal           = document.getElementById('initialModal');
+const confirmModal           = document.getElementById('confirmModal');
+const successModal           = document.getElementById('successModal');
+const modalSemestre          = document.getElementById('modalSemestre');
+const modalMateria           = document.getElementById('modalMateria');
+const modalGrupo             = document.getElementById('modalGrupo');
+const modalEquipo            = document.getElementById('modalEquipo');
+const btnIniciar             = document.getElementById('btnIniciar');
+const integrantesContainer   = document.getElementById('integrantesContainer');
+const listaIntegrantesTexto  = document.getElementById('listaIntegrantesTexto');
+const mainContainer          = document.getElementById('mainContainer');
+const subTitle               = document.getElementById('subTitle');
+const btnCambiarEquipo       = document.getElementById('btnCambiarEquipo');
 const btnConfirmarEvaluacion = document.getElementById('btnConfirmarEvaluacion');
+const slidersContainer       = document.getElementById('slidersContainer');
+const confirmEquipoText      = document.getElementById('confirmEquipoText');
+const confirmBaseText        = document.getElementById('confirmBaseText');
+const confirmAlumnosResumen  = document.getElementById('confirmAlumnosResumen');
+const btnRegresarConfirm     = document.getElementById('btnRegresarConfirm');
+const btnGuardarConfirm      = document.getElementById('btnGuardarConfirm');
 
-// Elementos de Confirmación
-const confirmEquipoText = document.getElementById('confirmEquipoText');
-const confirmRubricaPond = document.getElementById('confirmRubricaPond');
-const confirmSliderPond = document.getElementById('confirmSliderPond');
-const confirmCalificacionText = document.getElementById('confirmCalificacionText');
-const badgeCalificacion = document.getElementById('badgeCalificacion');
-const btnRegresarConfirm = document.getElementById('btnRegresarConfirm');
-const btnGuardarConfirm = document.getElementById('btnGuardarConfirm');
+// ── Estado ────────────────────────────────────────────────────────────────────
+let estadoActual = { semestre: "", materia: "", grupo: "", equipo: "" };
+let baseScore = null;
+let slidersPorAlumno = {};
 
-// Elementos de la Rúbrica y Slider
-const criterionCards = document.querySelectorAll('.criterion-card:not(.slider-section)');
-const personalSlider = document.getElementById('personalSlider');
-const sliderValueElem = document.getElementById('sliderValue');
-
-let scores = {};
-let estadoActual = {
-    semestre: "",
-    materia: "",
-    grupo: "",
-    equipo: ""
-};
-
-// Inicializar la estructura limpia de valores de rúbrica
-function initScores() {
-    criterionCards.forEach(card => {
-        const select = card.querySelector('.criterion-select');
-        const criterion = card.getAttribute('data-criterion');
-        
-        let defaultOpt = select.querySelector('option[value="-1"]');
-        if (!defaultOpt) {
-            defaultOpt = document.createElement('option');
-            defaultOpt.value = "-1";
-            defaultOpt.text = "Seleccione un nivel...";
-            defaultOpt.disabled = true;
-            select.insertBefore(defaultOpt, select.firstChild);
-        }
-        
-        select.value = "-1";
-        scores[criterion] = -1;
-    });
+// ── Helpers ───────────────────────────────────────────────────────────────────
+// La base ya viene ponderada al 60% desde la Rúbrica General.
+// Solo se suma el 40% personal del slider. Redondeo estándar (.5 sube).
+function calcularNota(base, slider) {
+    const raw = base + (slider * 0.4);
+    const rounded = Math.round(raw);
+    return Math.min(10, Math.max(5, rounded));
 }
 
-// Registro de eventos para manipulación de selectores base
-criterionCards.forEach(card => {
-    const select = card.querySelector('.criterion-select');
-    const criterion = card.getAttribute('data-criterion');
+function colorBadge(nota) {
+    if (nota >= 9.5) return "background:#00e676;color:#000";
+    if (nota >= 8.0) return "background:#aeea00;color:#000";
+    if (nota >= 6.0) return "background:#ffb300;color:#000";
+    return "background:#f44336;color:#fff";
+}
 
-    select.addEventListener('change', () => {
-        const selectedOption = select.options[select.selectedIndex];
-        const val = parseInt(selectedOption.value);
+// ── Cargar base del Sheet de Rúbrica General (solo lectura) ───────────────────
+async function cargarBaseScore() {
+    const { semestre, grupo, equipo } = estadoActual;
+    const badge  = document.getElementById('baseScoreBadge');
+    const status = document.getElementById('baseScoreStatus');
+    const contrib= document.getElementById('baseScoreContrib');
+    baseScore = null;
 
-        // Determinar la clase de nivel basada en el valor numérico (3, 2, 1, 0)
-        let level = "";
-        if (val === 3) level = "excelente";
-        else if (val === 2) level = "bueno";
-        else if (val === 1) level = "regular";
-        else if (val === 0) level = "insuficiente";
+    badge.textContent  = "…";
+    badge.style.cssText = "font-size:1.6rem;font-weight:800;padding:6px 18px;border-radius:10px;background:#e2e8f0;color:#334155;min-width:64px;text-align:center;";
+    status.textContent = "Consultando calificación base...";
+    contrib.textContent = "";
 
-        // Limpiar clases previas y añadir la nueva correspondiente
-        card.className = "criterion-card";
-        if (level) card.classList.add(level);
+    try {
+        const url = `${URL_APPS_SCRIPT}?accion=base&semestre=${encodeURIComponent(semestre)}&grupo=${encodeURIComponent(grupo)}&equipo=${encodeURIComponent(equipo)}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
 
-        scores[criterion] = val;
-    });
-});
-
-// Dentro de la lógica de limpieza/reinicio de criterios:
-criterionCards.forEach(card => {
-    const select = card.querySelector('.criterion-select');
-    select.value = ""; // O tu valor por defecto para deseleccionar
-    card.className = "criterion-card"; // Quita las clases excelente, bueno, etc.
-});
-
-// Listener para actualización del texto del Slider personalizado
-personalSlider.addEventListener('input', () => {
-    sliderValueElem.innerText = personalSlider.value;
-});
-
-function resetRubric() {
-    criterionCards.forEach(card => {
-        card.className = "criterion-card";
-        card.querySelector('.criterion-select').value = "-1";
-    });
-    personalSlider.value = 5;
-    sliderValueElem.innerText = "5";
-    
-    for (let key in scores) {
-        scores[key] = -1;
+        if (data.status === "success" && data.calificacionBase !== undefined) {
+            baseScore = parseFloat(data.calificacionBase);
+            badge.textContent  = baseScore.toFixed(1);
+            badge.style.cssText = `font-size:1.6rem;font-weight:800;padding:6px 18px;border-radius:10px;min-width:64px;text-align:center;${colorBadge(baseScore)}`;
+            status.textContent  = "Calificación base cargada correctamente.";
+            contrib.textContent = `Ya ponderada al 60% · Suma con 40% personal = nota final`;
+        } else {
+            status.textContent = "⚠️ No se encontró calificación base. Verifica que Rúbrica General ya guardó este equipo.";
+        }
+    } catch (e) {
+        status.textContent = "❌ Error al conectar. Verifica conexión y usa 🔄 Recargar.";
+        console.error(e);
     }
 }
 
-// Lógica de Modales en Cascada (Módulo Calificar)
+// ── Sliders individuales ──────────────────────────────────────────────────────
+function generarSliders(alumnos) {
+    slidersContainer.innerHTML = "";
+    slidersPorAlumno = {};
+
+    alumnos.forEach(nombre => {
+        slidersPorAlumno[nombre] = 5;
+
+        const card = document.createElement('div');
+        card.className = "criterion-card slider-alumno-card";
+        card.dataset.alumno = nombre;
+        card.innerHTML = `
+            <label style="font-size:0.88rem;font-weight:700;color:var(--primary-color);margin-bottom:6px;display:block;">${nombre}</label>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <input type="range" class="slider-alumno" min="0" max="10" step="1" value="5" style="flex:1;" data-alumno="${nombre}">
+                <span class="slider-alumno-val" style="font-size:1.1rem;font-weight:800;min-width:28px;text-align:right;">5</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#94a3b8;padding:0 2px;margin-top:2px;">
+                <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+            </div>
+            <div style="margin-top:6px;font-size:0.82rem;color:#64748b;">
+                Nota estimada: <strong class="nota-preview-val">—</strong>
+            </div>`;
+        slidersContainer.appendChild(card);
+
+        const sliderEl  = card.querySelector('.slider-alumno');
+        const valEl     = card.querySelector('.slider-alumno-val');
+        const previewEl = card.querySelector('.nota-preview-val');
+
+        sliderEl.addEventListener('input', () => {
+            const val = parseInt(sliderEl.value);
+            slidersPorAlumno[nombre] = val;
+            valEl.textContent = val;
+            actualizarPreview(card, val, previewEl);
+        });
+    });
+}
+
+function actualizarPreview(card, sliderVal, previewEl) {
+    if (baseScore === null) { previewEl.textContent = "—"; card.className = "criterion-card slider-alumno-card"; return; }
+    const nota = calcularNota(baseScore, sliderVal);
+    // MEJORA 1: mostrar sin decimales ya que ahora es entero
+    previewEl.textContent = nota.toString();
+    card.className = "criterion-card slider-alumno-card";
+    if (nota >= 9)    card.classList.add("excelente");
+    else if (nota >= 7.5) card.classList.add("bueno");
+    else if (nota >= 6)   card.classList.add("regular");
+    else card.classList.add("insuficiente");
+}
+
+function actualizarTodasLasPreviews() {
+    document.querySelectorAll('.slider-alumno-card').forEach(card => {
+        const sliderEl  = card.querySelector('.slider-alumno');
+        const previewEl = card.querySelector('.nota-preview-val');
+        actualizarPreview(card, parseInt(sliderEl.value), previewEl);
+    });
+}
+
+// ── Cascadas modal configuración ──────────────────────────────────────────────
 modalSemestre.addEventListener('change', () => {
     const sem = modalSemestre.value;
     modalMateria.innerHTML = '<option value="">Seleccione una materia...</option>';
-    modalGrupo.innerHTML = '<option value="">Seleccione un grupo...</option>';
-    modalEquipo.innerHTML = '<option value="">Seleccione un equipo...</option>';
+    modalGrupo.innerHTML   = '<option value="">Seleccione un grupo...</option>';
+    modalEquipo.innerHTML  = '<option value="">Seleccione un equipo...</option>';
     integrantesContainer.style.display = 'none';
-    modalGrupo.disabled = true;
-    modalEquipo.disabled = true;
-
+    modalMateria.disabled = true; modalGrupo.disabled = true; modalEquipo.disabled = true;
     if (sem) {
-        asignaturasPorSemestre[sem].forEach(m => {
-            modalMateria.innerHTML += `<option value="${m}">${m}</option>`;
-        });
+        asignaturasPorSemestre[sem].forEach(m => { modalMateria.innerHTML += `<option value="${m}">${m}</option>`; });
         modalMateria.disabled = false;
     }
     validarFormModal();
@@ -141,15 +160,12 @@ modalSemestre.addEventListener('change', () => {
 
 modalMateria.addEventListener('change', () => {
     const sem = modalSemestre.value;
-    modalGrupo.innerHTML = '<option value="">Seleccione un grupo...</option>';
+    modalGrupo.innerHTML  = '<option value="">Seleccione un grupo...</option>';
     modalEquipo.innerHTML = '<option value="">Seleccione un equipo...</option>';
     integrantesContainer.style.display = 'none';
-    modalEquipo.disabled = true;
-
+    modalGrupo.disabled = true; modalEquipo.disabled = true;
     if (modalMateria.value) {
-        fuentesGrupos[sem].forEach(g => {
-            modalGrupo.innerHTML += `<option value="${g}">Grupo ${g}</option>`;
-        });
+        fuentesGrupos[sem].forEach(g => { modalGrupo.innerHTML += `<option value="${g}">Grupo ${g}</option>`; });
         modalGrupo.disabled = false;
     }
     validarFormModal();
@@ -159,26 +175,18 @@ modalGrupo.addEventListener('change', () => {
     modalEquipo.innerHTML = '<option value="">Seleccione un equipo...</option>';
     integrantesContainer.style.display = 'none';
     const grupo = modalGrupo.value;
-
     if (grupo) {
-        const dicEquipos = equiposPorGrupo[grupo] || {};
-        const listaEquipos = Object.keys(dicEquipos);
-        
-        listaEquipos.forEach(eq => {
-            modalEquipo.innerHTML += `<option value="${eq}">${eq}</option>`;
-        });
+        const dic = equiposPorGrupo[grupo] || {};
+        Object.keys(dic).forEach(eq => { modalEquipo.innerHTML += `<option value="${eq}">${eq}</option>`; });
         modalEquipo.disabled = false;
     }
     validarFormModal();
 });
 
 modalEquipo.addEventListener('change', () => {
-    const grupo = modalGrupo.value;
-    const equipo = modalEquipo.value;
-
-    if (grupo && equipo && equiposPorGrupo[grupo] && equiposPorGrupo[grupo][equipo]) {
-        const alumnos = equiposPorGrupo[grupo][equipo];
-        listaIntegrantesTexto.innerText = alumnos.join(', ');
+    const grupo = modalGrupo.value, equipo = modalEquipo.value;
+    if (grupo && equipo && equiposPorGrupo[grupo]?.[equipo]) {
+        listaIntegrantesTexto.innerText = equiposPorGrupo[grupo][equipo].join(', ');
         integrantesContainer.style.display = 'block';
     } else {
         integrantesContainer.style.display = 'none';
@@ -187,188 +195,153 @@ modalEquipo.addEventListener('change', () => {
 });
 
 function validarFormModal() {
-    if (modalSemestre.value && modalMateria.value && modalGrupo.value && modalEquipo.value) {
-        btnIniciar.disabled = false;
-    } else {
-        btnIniciar.disabled = true;
-    }
+    btnIniciar.disabled = !(modalSemestre.value && modalMateria.value && modalGrupo.value && modalEquipo.value);
 }
 
-btnIniciar.addEventListener('click', () => {
+btnIniciar.addEventListener('click', async () => {
     estadoActual.semestre = modalSemestre.value;
-    estadoActual.materia = modalMateria.value;
-    estadoActual.grupo = modalGrupo.value;
-    estadoActual.equipo = modalEquipo.value;
+    estadoActual.materia  = modalMateria.value;
+    estadoActual.grupo    = modalGrupo.value;
+    estadoActual.equipo   = modalEquipo.value;
 
     subTitle.innerText = `Materia: ${estadoActual.materia} | Grupo: ${estadoActual.grupo} | ${estadoActual.equipo}`;
-    
-    initialModal.style.display = 'none';
+
+    const alumnos = equiposPorGrupo[estadoActual.grupo]?.[estadoActual.equipo] || [];
+    generarSliders(alumnos);
+
+    initialModal.style.display  = 'none';
     mainContainer.style.display = 'block';
+
+    await cargarBaseScore();
+    actualizarTodasLasPreviews();
+});
+
+document.getElementById('btnRecargarBase').addEventListener('click', async () => {
+    await cargarBaseScore();
+    actualizarTodasLasPreviews();
 });
 
 btnCambiarEquipo.addEventListener('click', () => {
     mainContainer.style.display = 'none';
-    resetRubric();
+    slidersContainer.innerHTML = "";
+    slidersPorAlumno = {};
+    baseScore = null;
     modalEquipo.value = "";
     integrantesContainer.style.display = 'none';
     validarFormModal();
     initialModal.style.display = 'block';
 });
 
-// Flujo de Confirmación con Validación y Escala Dinámica de Colores
+// ── Confirmar ─────────────────────────────────────────────────────────────────
 btnConfirmarEvaluacion.addEventListener('click', () => {
-    for (let key in scores) {
-        if (scores[key] === -1) {
-            alert("Por favor, seleccione una opción para todos los criterios antes de confirmar la evaluación.");
-            return;
-        }
+    if (baseScore === null) {
+        alert("La calificación base no se ha cargado. Usa 🔄 Recargar e intenta de nuevo.");
+        return;
     }
+    const alumnos = equiposPorGrupo[estadoActual.grupo]?.[estadoActual.equipo] || [];
+    confirmEquipoText.textContent = estadoActual.equipo;
+    confirmBaseText.textContent   = `${baseScore.toFixed(1)} / 10`;
+    confirmAlumnosResumen.innerHTML = "";
 
-    let totalRubrica = 0;
-    for (let key in scores) { totalRubrica += scores[key]; }
-    const maxPointsRubrica = criterionCards.length * 3;
-    
-    const pondRubrica = (totalRubrica / maxPointsRubrica) * 6.0;
-    const pondSlider = (parseInt(personalSlider.value) / 10) * 4.0;
-    const notaFinal = pondRubrica + pondSlider;
-
-    confirmEquipoText.innerText = estadoActual.equipo;
-    confirmRubricaPond.innerText = pondRubrica.toFixed(1);
-    confirmSliderPond.innerText = pondSlider.toFixed(1);
-    confirmCalificacionText.innerText = notaFinal.toFixed(1);
-
-    badgeCalificacion.className = "score-badge";
-    if (notaFinal === 10.0) {
-        badgeCalificacion.classList.add("badge-perfecto");
-    } else if (notaFinal >= 8.0 && notaFinal <= 9.9) {
-        badgeCalificacion.classList.add("badge-alto");
-    } else if (notaFinal >= 6.0 && notaFinal <= 7.9) {
-        badgeCalificacion.classList.add("badge-medio");
-    } else {
-        badgeCalificacion.classList.add("badge-bajo");
-    }
-
+    alumnos.forEach(nombre => {
+        const slider = slidersPorAlumno[nombre] ?? 5;
+        const nota   = calcularNota(baseScore, slider);
+        const row = document.createElement('div');
+        row.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;";
+        row.innerHTML = `
+            <span style="font-size:0.85rem;color:#334155;flex:1;">${nombre}</span>
+            <span style="font-size:0.8rem;color:#64748b;margin:0 10px;">Slider: ${slider}/10</span>
+            <span style="font-size:1rem;font-weight:800;padding:2px 12px;border-radius:12px;${colorBadge(nota)}">${nota}</span>`;
+        confirmAlumnosResumen.appendChild(row);
+    });
     confirmModal.style.display = 'flex';
 });
 
-btnRegresarConfirm.addEventListener('click', () => {
-    confirmModal.style.display = 'none';
-});
+btnRegresarConfirm.addEventListener('click', () => { confirmModal.style.display = 'none'; });
 
-const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxJ03tcnzK5eujtBn6QGHBS9eWkBx-A1Tlx0hNrYgk6CpsvWTeoAdP0o8_UNhVuwC1U_A/exec";
-
-btnGuardarConfirm.addEventListener('click', () => {
+// ── Guardar (una fila por alumno en el Sheet de Eval Transversal) ─────────────
+btnGuardarConfirm.addEventListener('click', async () => {
     btnGuardarConfirm.disabled = true;
 
-    let totalRubrica = 0;
-    for (let key in scores) { totalRubrica += scores[key]; }
-    const maxPointsRubrica = criterionCards.length * 3;
-    const pondRubrica = (totalRubrica / maxPointsRubrica) * 6.0;
-    const pondSlider = (parseInt(personalSlider.value) / 10) * 4.0;
-    const notaFinal = (pondRubrica + pondSlider).toFixed(1);
-
-    const payload = {
-        semestre: estadoActual.semestre,
-        materia: estadoActual.materia,
-        grupo: estadoActual.grupo,
-        equipo: estadoActual.equipo,
-        scores: scores,
-        sliderValue: personalSlider.value,
-        notaFinal: notaFinal
-    };
+    const alumnos = equiposPorGrupo[estadoActual.grupo]?.[estadoActual.equipo] || [];
+    const filas = alumnos.map(nombre => ({
+        semestre:         estadoActual.semestre,
+        materia:          estadoActual.materia,
+        grupo:            estadoActual.grupo,
+        equipo:           estadoActual.equipo,
+        alumno:           nombre,
+        calificacionBase: baseScore,
+        sliderPersonal:   slidersPorAlumno[nombre] ?? 5,
+        notaFinal:        calcularNota(baseScore, slidersPorAlumno[nombre] ?? 5)
+    }));
 
     confirmModal.style.display = 'none';
-    
-    const modalIconContainer = document.getElementById('modalIconContainer');
-    const modalStatusTitle = document.getElementById('modalStatusTitle');
-    const modalStatusText = document.getElementById('modalStatusText');
 
-    modalIconContainer.innerHTML = `<div class="loader-spinner"></div>`;
-    modalStatusTitle.innerText = "Enviando evaluación...";
-    modalStatusText.innerText = "Por favor, espere mientras se registran los datos.";
-    
+    const iconEl   = document.getElementById('modalIconContainer');
+    const titleEl  = document.getElementById('modalStatusTitle');
+    const textEl   = document.getElementById('modalStatusText');
+    iconEl.innerHTML = `<div class="loader-spinner"></div>`;
+    titleEl.innerText = "Guardando calificaciones...";
+    textEl.innerText  = `Registrando ${filas.length} alumnos.`;
     successModal.style.display = 'flex';
 
-    fetch(URL_APPS_SCRIPT, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(() => {
-        modalIconContainer.innerHTML = `
-            <div class="success-checkmark">
-                <div class="check-icon">
-                    <span class="icon-line line-tip"></span>
-                    <span class="icon-line line-long"></span>
-                </div>
-            </div>`;
-        modalStatusTitle.innerText = "¡Evaluación Guardada!";
-        modalStatusText.innerText = "La calificación fue registrada correctamente.";
+    try {
+        await fetch(URL_APPS_SCRIPT, {
+            method: "POST", mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ accion: "guardar", filas })
+        });
+
+        iconEl.innerHTML = `<div class="success-checkmark"><div class="check-icon"><span class="icon-line line-tip"></span><span class="icon-line line-long"></span></div></div>`;
+        titleEl.innerText = "¡Calificaciones guardadas!";
+        textEl.innerText  = `${filas.length} registros individuales enviados.`;
 
         setTimeout(() => {
-            successModal.style.display = 'none';
+            successModal.style.display  = 'none';
             mainContainer.style.display = 'none';
-            resetRubric();
-            
+            slidersContainer.innerHTML  = "";
+            slidersPorAlumno = {};
+            baseScore = null;
             integrantesContainer.style.display = 'none';
             listaIntegrantesTexto.innerText = "";
 
             modalEquipo.innerHTML = '<option value="">Seleccione un equipo...</option>';
-            
-            const grupoActual = estadoActual.grupo;
-            const dicEquipos = equiposPorGrupo[grupoActual] || {};
-            const listaEquipos = Object.keys(dicEquipos);
-
-            listaEquipos.forEach(eq => {
-                modalEquipo.innerHTML += `<option value="${eq}">${eq}</option>`;
-            });
+            const dic = equiposPorGrupo[estadoActual.grupo] || {};
+            Object.keys(dic).forEach(eq => { modalEquipo.innerHTML += `<option value="${eq}">${eq}</option>`; });
             modalEquipo.value = "";
             modalEquipo.disabled = false;
-            
+
             validarFormModal();
             btnGuardarConfirm.disabled = false;
             initialModal.style.display = 'block';
-        }, 2000);
-    })
-    .catch(error => {
-        console.error("Error al registrar en Google Sheets:", error);
-        
-        modalIconContainer.innerHTML = `
-            <div style="width: 80px; height: 80px; margin: 0 auto; border: 4px solid var(--reset-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--reset-color); font-size: 3rem; font-weight: bold;">
-                ✕
-            </div>`;
-        modalStatusTitle.innerText = "Error de Conexión";
-        modalStatusText.innerText = "No se pudo sincronizar con el servidor. Regresando al resumen...";
+        }, 2200);
 
+    } catch (error) {
+        console.error(error);
+        iconEl.innerHTML = `<div style="width:80px;height:80px;margin:0 auto;border:4px solid var(--reset-color);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--reset-color);font-size:3rem;font-weight:bold;">✕</div>`;
+        titleEl.innerText = "Error de Conexión";
+        textEl.innerText  = "No se pudo sincronizar. Regresando...";
         setTimeout(() => {
             successModal.style.display = 'none';
             confirmModal.style.display = 'flex';
             btnGuardarConfirm.disabled = false;
         }, 2500);
-    });
+    }
 });
 
-// ==========================================
-// MÓDULO DE NAVEGACIÓN Y CONSULTA (MENÚ INICIAL)
-// ==========================================
-
-const readSemestre = document.getElementById('readSemestre');
-const readMateria = document.getElementById('readMateria');
-const readGrupo = document.getElementById('readGrupo');
-const wrapperTipoVista = document.getElementById('wrapperTipoVista'); 
+// ── Módulo Consulta ───────────────────────────────────────────────────────────
+const readSemestre            = document.getElementById('readSemestre');
+const readMateria             = document.getElementById('readMateria');
+const readGrupo               = document.getElementById('readGrupo');
 const btnBuscarCalificaciones = document.getElementById('btnBuscarCalificaciones');
-const loaderConsulta = document.getElementById('loaderConsulta');
-const containerResultados = document.getElementById('containerResultados');
-
+const loaderConsulta          = document.getElementById('loaderConsulta');
+const containerResultados     = document.getElementById('containerResultados');
 let datosConsultaCache = [];
 
 btnModCalificar.addEventListener('click', () => {
     menuPrincipal.style.display = 'none';
     secCalificar.classList.add('active');
-    initialModal.style.display = 'block';
+    initialModal.style.display  = 'block';
     mainContainer.style.display = 'none';
 });
 
@@ -379,37 +352,31 @@ btnModConsultar.addEventListener('click', () => {
     readSemestre.value = "";
     readMateria.innerHTML = '<option value="">Seleccione una materia...</option>';
     readMateria.disabled = true;
-    readGrupo.innerHTML = '<option value="">Seleccione un grupo...</option>';
-    readGrupo.disabled = true;
+    readGrupo.innerHTML  = '<option value="">Seleccione un grupo...</option>';
+    readGrupo.disabled   = true;
     btnBuscarCalificaciones.disabled = true;
-    // --- AGREGAR ESTA LÍNEA ---
-    document.querySelector('input[name="tipoVistaConsulta"][value="equipos"]').checked = true; 
+    // MEJORA 2: ocultar el botón exportar hasta que haya datos cargados
+    document.getElementById('btnExportarCURA').style.display = 'none';
 });
+
 document.querySelectorAll('.btn-back-menu').forEach(btn => {
     btn.addEventListener('click', () => {
         secCalificar.classList.remove('active');
         secConsultar.classList.remove('active');
         menuPrincipal.style.display = 'flex';
-        resetRubric();
     });
 });
 
-// Cascadas para selectores del área de Consulta con limpieza automática
 readSemestre.addEventListener('change', () => {
     datosConsultaCache = [];
     const sem = readSemestre.value;
     readMateria.innerHTML = '<option value="">Seleccione una materia...</option>';
-    readGrupo.innerHTML = '<option value="">Seleccione un grupo...</option>';
-    readMateria.disabled = true;
-    readGrupo.disabled = true;
-    btnBuscarCalificaciones.disabled = true;
-    
+    readGrupo.innerHTML   = '<option value="">Seleccione un grupo...</option>';
+    readMateria.disabled = true; readGrupo.disabled = true; btnBuscarCalificaciones.disabled = true;
     containerResultados.innerHTML = "";
-
+    document.getElementById('btnExportarCURA').style.display = 'none';
     if (sem && asignaturasPorSemestre[sem]) {
-        asignaturasPorSemestre[sem].forEach(m => {
-            readMateria.innerHTML += `<option value="${m}">${m}</option>`;
-        });
+        asignaturasPorSemestre[sem].forEach(m => { readMateria.innerHTML += `<option value="${m}">${m}</option>`; });
         readMateria.disabled = false;
     }
 });
@@ -418,15 +385,11 @@ readMateria.addEventListener('change', () => {
     datosConsultaCache = [];
     const sem = readSemestre.value;
     readGrupo.innerHTML = '<option value="">Seleccione un grupo...</option>';
-    readGrupo.disabled = true;
-    btnBuscarCalificaciones.disabled = true;
-    
+    readGrupo.disabled = true; btnBuscarCalificaciones.disabled = true;
     containerResultados.innerHTML = "";
-
+    document.getElementById('btnExportarCURA').style.display = 'none';
     if (readMateria.value && fuentesGrupos[sem]) {
-        fuentesGrupos[sem].forEach(g => {
-            readGrupo.innerHTML += `<option value="${g}">Grupo ${g}</option>`;
-        });
+        fuentesGrupos[sem].forEach(g => { readGrupo.innerHTML += `<option value="${g}">Grupo ${g}</option>`; });
         readGrupo.disabled = false;
     }
 });
@@ -434,235 +397,221 @@ readMateria.addEventListener('change', () => {
 readGrupo.addEventListener('change', () => {
     btnBuscarCalificaciones.disabled = !readGrupo.value;
     containerResultados.innerHTML = "";
-    datosConsultaCache = []; // <-- Agregar esta línea para mantener consistencia
+    datosConsultaCache = [];
+    document.getElementById('btnExportarCURA').style.display = 'none';
 });
 
-// Petición HTTP GET para Consultar Calificaciones
 btnBuscarCalificaciones.addEventListener('click', () => {
-    const semestre = readSemestre.value;
-    const materia = readMateria.value;
-    const grupo = readGrupo.value;
-
-    if (!semestre || !grupo) {
-        alert("Por favor, selecciona los campos requeridos para la consulta.");
-        return;
-    }
+    const semestre = readSemestre.value, materia = readMateria.value, grupo = readGrupo.value;
+    if (!semestre || !grupo) { alert("Selecciona los campos requeridos."); return; }
 
     containerResultados.innerHTML = "";
-    loaderConsulta.style.display = "block";
-    
-    const leyendaCargando = document.createElement('p');
-    leyendaCargando.id = "leyendaCargando";
-    leyendaCargando.style.cssText = "text-align: center; color: #64748b; font-size: 0.9rem; margin-top: -10px; margin-bottom: 20px;";
-    leyendaCargando.innerText = "Por favor, espere un momento mientras se recuperan los registros del servidor.";
-    loaderConsulta.parentNode.insertBefore(leyendaCargando, loaderConsulta.nextSibling);
+    document.getElementById('btnExportarCURA').style.display = 'none';
+    loaderConsulta.style.display  = "block";
+    const ley = document.createElement('p');
+    ley.id = "leyendaCargando";
+    ley.style.cssText = "text-align:center;color:#64748b;font-size:0.9rem;margin-top:-10px;margin-bottom:20px;";
+    ley.innerText = "Recuperando registros...";
+    loaderConsulta.parentNode.insertBefore(ley, loaderConsulta.nextSibling);
 
-    fetch(`${URL_APPS_SCRIPT}?semestre=${encodeURIComponent(semestre)}&grupo=${encodeURIComponent(grupo)}`)
-        .then(response => response.json())
+    fetch(`${URL_APPS_SCRIPT}?accion=consultar&semestre=${encodeURIComponent(semestre)}&grupo=${encodeURIComponent(grupo)}`)
+        .then(r => r.json())
         .then(data => {
             loaderConsulta.style.display = "none";
-            const leyendExistente = document.getElementById('leyendaCargando');
-            if (leyendExistente) leyendExistente.remove();
-
-            // --- REEMPLAZAR DESDE AQUÍ ---
+            document.getElementById('leyendaCargando')?.remove();
             if (data.status === "success" && data.data.length > 0) {
-                datosConsultaCache = data.data; // Guardar en caché global
-                ejecutarFiltroYRenderizado();    // Llamar a la función de renderizado
+                datosConsultaCache = data.data;
+                ejecutarFiltroYRenderizado(materia);
+                // MEJORA 3: mostrar botón exportar CURA si hay materia y datos
+                if (materia) {
+                    document.getElementById('btnExportarCURA').style.display = 'block';
+                }
             } else {
-                datosConsultaCache = [];
-                containerResultados.innerHTML = `<p style="text-align:center; color: #64748b; margin-top:20px; font-size:0.95rem;">No se encontraron evaluaciones registradas para estos criterios.</p>`;
+                containerResultados.innerHTML = `<p style="text-align:center;color:#64748b;margin-top:20px;">No se encontraron evaluaciones registradas.</p>`;
             }
         })
         .catch(err => {
-            console.error("Error al leer datos:", err);
             loaderConsulta.style.display = "none";
-            const leyendExistente = document.getElementById('leyendaCargando');
-            if (leyendExistente) leyendExistente.remove();
-            containerResultados.innerHTML = `<p style="text-align:center; color: var(--reset-color); margin-top:20px; font-size:0.95rem;">Error al conectar con el servidor.</p>`;
+            document.getElementById('leyendaCargando')?.remove();
+            containerResultados.innerHTML = `<p style="text-align:center;color:var(--reset-color);margin-top:20px;">Error al conectar.</p>`;
         });
 });
 
-// Renderizado dinámico de tarjetas móviles sin la vista de materia
-function renderizarCalificaciones(lista) {
-    const grupoActualConsulta = readGrupo.value;
-
-    lista.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = "card-view";
-        
-        const dicEquipos = equiposPorGrupo[grupoActualConsulta] || {};
-        const alumnosEquipo = dicEquipos[item.equipo] || [];
-        const listaAlumnosTexto = alumnosEquipo.length > 0 ? alumnosEquipo.join(', ') : "No especificados";
-
-        // --- LÓGICA DE COLOR DINÁMICO ---
-        const nota = parseFloat(item.notaFinal);
-        let estiloBadge = "";
-        if (nota === 10.0) estiloBadge = "background-color: #00e676; color: #000000;";
-        else if (nota >= 8.0 && nota <= 9.9) estiloBadge = "background-color: #aeea00; color: #000000;";
-        else if (nota >= 6.0 && nota <= 7.9) estiloBadge = "background-color: #ffb300; color: #000000;";
-        else estiloBadge = "background-color: #f44336; color: #ffffff;";
-
-        card.innerHTML = `
-            <div class="card-header-view">
-                <div style="flex: 1; padding-right: 8px;">
-                    <h3 style="margin:0 0 4px 0; color: var(--primary-color); font-size:1.1rem;">${item.equipo}</h3>
-                    <div style="font-size: 0.85rem; color: var(--text-main); background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1px solid #e2e8f0; margin-top: 4px;">
-                        <strong style="color: var(--primary-color);">Integrantes:</strong> ${listaAlumnosTexto}
-                    </div>
-                </div>
-                <div style="text-align: right; display:flex; flex-direction: column; align-items: flex-end; gap: 8px; justify-content: flex-start;">
-                    <span class="score-badge" style="margin:0; font-size: 1.1rem; ${estiloBadge}">${nota.toFixed(1)}</span>
-                    <button class="btn-navigation btn-details" data-target="details-${index}" style="padding: 4px 10px; font-size:0.8rem; margin:0; width:max-content;">Detalles</button>
-                </div>
-            </div>
-            <div id="details-${index}" class="details-grid" style="display: none;">
-                <div class="detail-item"><strong>Bitácora:</strong> ${item.bitacora} pts</div>
-                <div class="detail-item"><strong>Redacción:</strong> ${item.redaccion} pts</div>
-                <div class="detail-item"><strong>Contenido:</strong> ${item.contenido} pts</div>
-                <div class="detail-item"><strong>Salud Árbol:</strong> ${item.salud} pts</div>
-                <div class="detail-item"><strong>Material:</strong> ${item.material} pts</div>
-                <div class="detail-item"><strong>Colaborativo:</strong> ${item.colaborativo} pts</div>
-                <div class="detail-item"><strong>Vestimenta:</strong> ${item.vestimenta} pts</div>
-                <div class="detail-item"><strong>Lenguaje:</strong> ${item.lenguaje} pts</div>
-                <div class="detail-item"><strong>Tiempo:</strong> ${item.tiempo} pts</div>
-                <div class="detail-item"><strong>PowerPoint:</strong> ${item.ppt} pts</div>
-                <div class="detail-item"><strong>Asistencia:</strong> ${item.asistencia} pts</div>
-                <div class="detail-item" style="grid-column: 1 / -1; border-top: 1px dashed #cbd5e1; padding-top: 6px; margin-top: 4px; font-weight:600;">
-                    Asignatura (Slider): ${item.sliderValue} / 10
-                </div>
-            </div>
-        `;
-        containerResultados.appendChild(card);
-    });
-
-    containerResultados.querySelectorAll('.btn-details').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const targetId = e.target.getAttribute('data-target');
-            const targetDiv = document.getElementById(targetId);
-            if (targetDiv.style.display === "none") {
-                targetDiv.style.display = "grid";
-                e.target.innerText = "Ocultar";
-                e.target.style.backgroundColor = "#cbd5e1";
-            } else {
-                targetDiv.style.display = "none";
-                e.target.innerText = "Detalles";
-                e.target.style.backgroundColor = "#e2e8f0";
-            }
-        });
-    });
-}
-
-// Inicializar ejecución limpia al cargar
-initScores();
-
-// Nueva función para renderizar el listado ordenado alfabéticamente por alumnos individuales
-function renderizarCalificacionesPorAlumnos(lista) {
-    const grupoActualConsulta = readGrupo.value;
-    const dicEquipos = equiposPorGrupo[grupoActualConsulta] || {};
-    let listaAlumnosDesagregados = [];
-
-    // Desglosar las notas de los equipos hacia cada uno de sus integrantes correspondientes
-    lista.forEach(item => {
-        const alumnosEquipo = dicEquipos[item.equipo] || [];
-        alumnosEquipo.forEach(alumno => {
-            listaAlumnosDesagregados.push({
-                nombre: alumno,
-                notaFinal: parseFloat(item.notaFinal).toFixed(1),
-                detalles: item,
-                sliderValue: item.sliderValue
-            });
-        });
-    });
-
-    // Ordenar alfabéticamente de la A a la Z por el nombre del estudiante
-    listaAlumnosDesagregados.sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-    // Renderizar la interfaz individualizada
-    listaAlumnosDesagregados.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = "card-view";
-        
-        // --- LÓGICA DE COLOR DINÁMICO PARA ALUMNOS ---
-        const notaAlumno = parseFloat(item.notaFinal);
-        let estiloBadgeAlumno = "";
-        if (notaAlumno === 10.0) estiloBadgeAlumno = "background-color: #00e676; color: #000000;";
-        else if (notaAlumno >= 8.0 && notaAlumno <= 9.9) estiloBadgeAlumno = "background-color: #aeea00; color: #000000;";
-        else if (notaAlumno >= 6.0 && notaAlumno <= 7.9) estiloBadgeAlumno = "background-color: #ffb300; color: #000000;";
-        else estiloBadgeAlumno = "background-color: #f44336; color: #ffffff;";
-
-        card.innerHTML = `
-            <div class="card-header-view">
-                <div style="flex: 1; padding-right: 8px;">
-                    <h3 style="margin:0 0 4px 0; color: var(--text-main); font-size:1.05rem; font-weight: 600;">${item.nombre}</h3>
-                </div>
-                <div style="text-align: right; display:flex; flex-direction: column; align-items: flex-end; gap: 8px; justify-content: flex-start;">
-                    <span class="score-badge" style="margin:0; font-size: 1.1rem; ${estiloBadgeAlumno}">${notaAlumno.toFixed(1)}</span>
-                    <button class="btn-navigation btn-details" data-target="details-alumno-${index}" style="padding: 4px 10px; font-size:0.8rem; margin:0; width:max-content;">Detalles</button>
-                </div>
-            </div>
-            <div id="details-alumno-${index}" class="details-grid" style="display: none;">
-                <div class="detail-item"><strong>Bitácora:</strong> ${item.detalles.bitacora} pts</div>
-                <div class="detail-item"><strong>Redacción:</strong> ${item.detalles.redaccion} pts</div>
-                <div class="detail-item"><strong>Contenido:</strong> ${item.detalles.contenido} pts</div>
-                <div class="detail-item"><strong>Salud Árbol:</strong> ${item.detalles.salud} pts</div>
-                <div class="detail-item"><strong>Material:</strong> ${item.detalles.material} pts</div>
-                <div class="detail-item"><strong>Colaborativo:</strong> ${item.detalles.colaborativo} pts</div>
-                <div class="detail-item"><strong>Vestimenta:</strong> ${item.detalles.vestimenta} pts</div>
-                <div class="detail-item"><strong>Lenguaje:</strong> ${item.detalles.lenguaje} pts</div>
-                <div class="detail-item"><strong>Tiempo:</strong> ${item.detalles.tiempo} pts</div>
-                <div class="detail-item"><strong>PowerPoint:</strong> ${item.detalles.ppt} pts</div>
-                <div class="detail-item"><strong>Asistencia:</strong> ${item.detalles.asistencia} pts</div>
-                <div class="detail-item" style="grid-column: 1 / -1; border-top: 1px dashed #cbd5e1; padding-top: 6px; margin-top: 4px; font-weight:600;">
-                    Asignatura (Slider): ${item.sliderValue} / 10
-                </div>
-            </div>
-        `;
-        containerResultados.appendChild(card);
-    });
-
-    // Delegar manejadores de eventos funcionales para los botones colapsables de detalles individuales
-    containerResultados.querySelectorAll('.btn-details').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const targetId = e.target.getAttribute('data-target');
-            const targetDiv = document.getElementById(targetId);
-            if (targetDiv.style.display === "none") {
-                targetDiv.style.display = "grid";
-                e.target.innerText = "Ocultar";
-                e.target.style.backgroundColor = "#cbd5e1";
-            } else {
-                targetDiv.style.display = "none";
-                e.target.innerText = "Detalles";
-                e.target.style.backgroundColor = "#e2e8f0";
-            }
-        });
-    });
-}
-// Función para procesar los datos del caché y renderizar según la vista seleccionada
-function ejecutarFiltroYRenderizado() {
-    const materia = readMateria.value;
+// MEJORA 2: la consulta siempre renderiza por alumnos, ya no hay radio buttons
+function ejecutarFiltroYRenderizado(materia) {
     containerResultados.innerHTML = "";
-
-    if (datosConsultaCache.length === 0) return;
-
-    const filtradosPorMateria = datosConsultaCache.filter(item => item.materia === materia);
-    
-    if (filtradosPorMateria.length > 0) {
-        const tipoVista = document.querySelector('input[name="tipoVistaConsulta"]:checked').value;
-        if (tipoVista === "alumnos") {
-            renderizarCalificacionesPorAlumnos(filtradosPorMateria);
-        } else {
-            renderizarCalificaciones(filtradosPorMateria);
-        }
-    } else {
-        containerResultados.innerHTML = `<p style="text-align:center; color: #64748b; margin-top:20px; font-size:0.95rem;">No se encontraron evaluaciones registradas para esta materia.</p>`;
+    const filtrados = materia ? datosConsultaCache.filter(i => i.materia === materia) : datosConsultaCache;
+    if (!filtrados.length) {
+        containerResultados.innerHTML = `<p style="text-align:center;color:#64748b;margin-top:20px;">No hay evaluaciones para esta materia.</p>`;
+        document.getElementById('btnExportarCURA').style.display = 'none';
+        return;
     }
+    renderizarPorAlumnos(filtrados);
 }
 
-// Escuchar cambios en los interruptores de tipo de vista para actualizar al instante
-document.querySelectorAll('input[name="tipoVistaConsulta"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-        if (datosConsultaCache.length > 0) {
-            ejecutarFiltroYRenderizado();
-        }
+function renderizarPorAlumnos(lista) {
+    [...lista].sort((a,b) => a.alumno.localeCompare(b.alumno)).forEach(item => {
+        const nota = parseFloat(item.notaFinal);
+        const card = document.createElement('div');
+        card.className = "card-view";
+        card.innerHTML = `
+            <div class="card-header-view">
+                <div style="flex:1;padding-right:8px;">
+                    <h3 style="margin:0 0 2px 0;color:var(--text-main);font-size:1rem;font-weight:700;">${item.alumno}</h3>
+                    <span style="font-size:0.78rem;color:#94a3b8;">${item.equipo} · ${item.materia}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                    <span class="score-badge" style="margin:0;${colorBadge(nota)}">${nota}</span>
+                    <span style="font-size:0.75rem;color:#64748b;">Slider: ${item.sliderPersonal}/10 · Base: ${item.calificacionBase}</span>
+                </div>
+            </div>`;
+        containerResultados.appendChild(card);
     });
+}
+
+// ── MEJORA 3: Exportar Script CURA (P4) ──────────────────────────────────────
+// Genera un .txt con el mismo formato que el Generador de Scripts CURA,
+// usando la notaFinal de cada alumno como calificación CUR, para columna P4.
+// El nombre del archivo: Grupo{grupo}_{materia}.txt
+
+function buildScriptCURA(grupo, materia, alumnos) {
+    // alumnos: [{ nombre, notaFinal }]
+    const fecha = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    const datos = alumnos.map(a => `${a.nombre}\t${a.notaFinal}`).join('\n');
+
+    const TEMPLATE_LINES = [
+        '// ============================================================',
+        '// CONFIGURA AQUI',
+        '// ============================================================',
+        `// Grupo: ${grupo}  ·  Materia: ${materia}  ·  generado automaticamente, ${fecha}`,
+        'const COLUMNA = "P4"; // cambia a P1, P2, P3 o P4 si es necesario',
+        '',
+        '// Nombre [TAB] Calificacion, uno por linea (ya viene listo, no lo toques)',
+        `const DATOS = \`${datos}\`;`,
+        '',
+        '// ============================================================',
+        '// NO NECESITAS TOCAR NADA DE AQUI PARA ABAJO',
+        '// ============================================================',
+        '',
+        'function normalizarCura(texto) {',
+        '  return texto',
+        '    .normalize("NFKD")',
+        '    .replace(/[\\u0300-\\u036f]/g, "")',
+        '    .replace(/\\s+/g, " ")',
+        '    .trim()',
+        '    .toUpperCase();',
+        '}',
+        '',
+        'function setNativeValueCura(input, value) {',
+        '  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;',
+        '  setter.call(input, value);',
+        '  input.dispatchEvent(new Event("input", { bubbles: true }));',
+        '  input.dispatchEvent(new Event("change", { bubbles: true }));',
+        '}',
+        '',
+        'function cargarCalificacionesCura() {',
+        '  // 1. localizar la columna real (data-field) a partir de la etiqueta visible',
+        '  const headers = Array.from(document.querySelectorAll(\'div[role="columnheader"]\'));',
+        '  const header = headers.find(h => h.getAttribute("aria-label") === COLUMNA);',
+        '  if (!header) {',
+        '    console.error(`No encontre la columna "${COLUMNA}". Columnas disponibles:`,',
+        '      headers.map(h => h.getAttribute("aria-label")));',
+        '    return;',
+        '  }',
+        '  const dataField = header.getAttribute("data-field");',
+        '  console.log(`Columna "${COLUMNA}" -> data-field="${dataField}"`);',
+        '',
+        '  // 2. indexar filas de la tabla por nombre normalizado',
+        '  const filas = Array.from(document.querySelectorAll("div.MuiDataGrid-row"));',
+        '  const indice = new Map();',
+        '  filas.forEach(fila => {',
+        '    const celdaNombre = fila.querySelector(\'div[data-field="student"]\');',
+        '    if (!celdaNombre) return;',
+        '    indice.set(normalizarCura(celdaNombre.innerText), fila);',
+        '  });',
+        '  console.log(`Filas detectadas en la tabla: ${indice.size}`);',
+        '',
+        '  // 3. parsear los datos pegados arriba',
+        '  const lineas = DATOS.trim().split("\\n").filter(l => l.trim());',
+        '  const alumnos = lineas.map(l => {',
+        '    const [nombre, calif] = l.split("\\t");',
+        '    return { nombre: nombre.trim(), calificacion: (calif || "").trim() };',
+        '  });',
+        '  console.log(`Alumnos leidos: ${alumnos.length}`);',
+        '',
+        '  // 4. capturar',
+        '  const noEncontrados = [];',
+        '  const bloqueados = [];',
+        '  let capturados = 0;',
+        '',
+        '  alumnos.forEach(({ nombre, calificacion }) => {',
+        '    if (!calificacion) { noEncontrados.push(`${nombre} (sin calificacion)`); return; }',
+        '    const fila = indice.get(normalizarCura(nombre));',
+        '    if (!fila) { noEncontrados.push(nombre); return; }',
+        '',
+        '    const celda = fila.querySelector(`div[data-field="${dataField}"]`);',
+        '    const input = celda ? celda.querySelector("input") : null;',
+        '    if (!input) { noEncontrados.push(`${nombre} (sin input en esa columna)`); return; }',
+        '    if (input.disabled) { bloqueados.push(nombre); return; }',
+        '',
+        '    setNativeValueCura(input, calificacion);',
+        '    capturados++;',
+        '    console.log(`OK  ${nombre} -> ${calificacion}`);',
+        '  });',
+        '',
+        '  console.log("\\n--- RESUMEN ---");',
+        '  console.log(`Capturados: ${capturados}`);',
+        '  console.log("No encontrados:", noEncontrados);',
+        '  console.log("Bloqueados (celda deshabilitada):", bloqueados);',
+        '  console.log("\\nRevisa la tabla en pantalla. Si todo se ve bien, corre: guardarCalificacionesCura()");',
+        '}',
+        '',
+        'function guardarCalificacionesCura() {',
+        '  const botones = Array.from(document.querySelectorAll("button"));',
+        '  const boton = botones.find(b => b.textContent.trim() === "Guardar");',
+        '  if (!boton) {',
+        '    console.error("No encontre el boton \'Guardar\'. Guardalo manualmente.");',
+        '    return;',
+        '  }',
+        '  boton.click();',
+        '  console.log("Clic en \'Guardar\' realizado. Verifica que se haya confirmado en pantalla.");',
+        '}',
+        '',
+        'cargarCalificacionesCura();'
+    ];
+
+    return TEMPLATE_LINES.join('\n');
+}
+
+document.getElementById('btnExportarCURA').addEventListener('click', () => {
+    const grupo   = readGrupo.value;
+    const materia = readMateria.value;
+    if (!grupo || !materia) { alert("Selecciona grupo y materia antes de exportar."); return; }
+
+    const filtrados = datosConsultaCache.filter(i => i.materia === materia);
+    if (!filtrados.length) { alert("No hay datos para exportar."); return; }
+
+    // Tomar el registro más reciente por alumno (si hay duplicados, quedarse con el último)
+    const porAlumno = {};
+    filtrados.forEach(item => { porAlumno[item.alumno] = item; });
+
+    // Ordenar A-Z
+    const alumnos = Object.values(porAlumno)
+        .sort((a, b) => a.alumno.localeCompare(b.alumno))
+        .map(item => ({
+            nombre:    item.alumno.trim().replace(/\s+/g, ' ').replace(/`/g, "'").replace(/\$\{/g, '$ {'),
+            notaFinal: parseFloat(item.notaFinal)
+        }));
+
+    const texto    = buildScriptCURA(grupo, materia, alumnos);
+    // Nombre: Grupo{grupo}_{materia}.txt — se reemplazan caracteres no permitidos en nombre de archivo
+    const nombreArchivo = `Grupo${grupo}_${materia.replace(/[/\\:*?"<>|]/g, '_')}.txt`;
+
+    const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = nombreArchivo;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 });
