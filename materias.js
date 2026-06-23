@@ -1,5 +1,5 @@
 const asignaturasPorSemestre = {
-    "2do": ["Inglés II", "Cultura Digital II", "Taller de Ciencias I", "Informática II"],
-    "4to": ["Inglés IV", "Temas Selectos Matemáticas", "Física I", "Conciencia Histórica IV"],
-    "6to": ["Conciencia Histórica VI", "Filosofía", "Ecología"]
+    "2do": ["Cultura Digital II", "Humanidades", "Sexualidad y Genero"],
+    "4to": ["Temas Selectos Matemáticas"],
+    "6to": ["Sin materias cargadas"]
 };
