@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PEC 2026 COMPLETO</title>
+    <title>Evaluación Transversal PEC 2026</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="menuPrincipal" class="welcome-container">
         <h1>Evaluación PEC 2026</h1>
-        <h2 style="color: blue;">Modo: evaluación completa</h2>
+        <h2 style="color: blue;">Evaluación Transversal</h2>
         <p>Selecciona una acción para comenzar</p>
         <div class="menu-grid">
             <button id="btnModCalificar" class="menu-card btn-calificar">
                 <div class="menu-icon">📝</div>
                 <h3 style="color: blue;">Calificar Equipos</h3>
-                <small>Evaluar rúbricas y registrar nuevas calificaciones</small>
+                <small>Registrar evaluación individual por alumno</small>
             </button>
             <button id="btnModConsultar" class="menu-card btn-consultar">
                 <div class="menu-icon">📊</div>
                 <h3 style="color: blue;">Consultar Calificaciones</h3>
-                <small>Ver calificaciones guardadas y detalles de rúbrica por grupo</small>
+                <small>Ver calificaciones individuales guardadas</small>
             </button>
         </div>
     </div>
@@ -59,111 +59,45 @@
                     <option value="">Seleccione un equipo...</option>
                 </select>
             </div>
-
-            <div id="integrantesContainer" style="display: none; background: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; border: 1px solid #cbd5e1;">
-    <strong style="color: var(--primary-color); display: block; margin-bottom: 4px;">Integrantes del equipo:</strong>
-    <span id="listaIntegrantesTexto" style="color: var(--text-main); line-height: 1.4;"></span>
-</div>
-
-
+            <div id="integrantesContainer" style="display:none; background:#f1f5f9; padding:12px; border-radius:8px; margin-bottom:16px; font-size:0.9rem; border:1px solid #cbd5e1;">
+                <strong style="color:var(--primary-color); display:block; margin-bottom:4px;">Integrantes del equipo:</strong>
+                <span id="listaIntegrantesTexto" style="color:var(--text-main); line-height:1.4;"></span>
+            </div>
             <button id="btnIniciar" class="btn-primary" disabled>Iniciar Evaluación</button>
         </div>
 
-        <div id="mainContainer" class="container" style="display: none;">
+        <div id="mainContainer" class="container" style="display:none;">
             <div class="header-navigation">
                 <button class="btn-navigation" id="btnCambiarEquipo">← Cambiar Equipo</button>
             </div>
-            <h1 id="mainTitle">Rúbrica de Evaluación PEC 2026</h1>
+            <h1 id="mainTitle">Evaluación Transversal PEC 2026</h1>
             <h3 id="subTitle"></h3>
-            
-            <div id="rubricForm" class="rubric-form">
-                <div id="rubricForm" class="rubric-form">
-    <div class="criterion-card" data-criterion="bitacora"><label>Registros en Bitácora</label><select class="criterion-select">
-        <option value="3">EXCELENTE: 25 registros o más.</option>
-        <option value="2">BUENO: Al menos 20 registros.</option>
-        <option value="1">REGULAR: Al menos 15 registros.</option>
-        <option value="0">INSUFICIENTE: Menos de 15 registros.</option>
-    </select></div>
 
-    <div class="criterion-card" data-criterion="redaccion"><label>Redacción y Estructura</label><select class="criterion-select">
-        <option value="3">EXCELENTE: Clara y con todos los elementos.</option>
-        <option value="2">BUENO: Clara y estructurada, mínimos errores.</option>
-        <option value="1">REGULAR: Parcial, errores frecuentes.</option>
-        <option value="0">INSUFICIENTE: Deficiente estructura y ortografía.</option>
-    </select></div>
-
-    <div class="criterion-card" data-criterion="contenido"><label>Contenido de la bitácora</label><select class="criterion-select">
-        <option value="3">EXCELENTE: Integra 6 elementos.</option>
-        <option value="2">BUENO: Integra 4 elementos.</option>
-        <option value="1">REGULAR: Integra 3 elementos.</option>
-        <option value="0">INSUFICIENTE: Menos de 3 elementos.</option>
-    </select></div>
-
-    <div class="criterion-card" data-criterion="salud"><label>Estado de Salud del Árbol</label><select class="criterion-select">
-        <option value="3">EXCELENTE: Condiciones propicias.</option>
-        <option value="2">BUENO: Salud buena, futuro estable.</option>
-        <option value="1">REGULAR: Salud comprometida.</option>
-        <option value="0">INSUFICIENTE: Estado deplorable o sin vida.</option>
-    </select></div>
-
-    <div class="criterion-card" data-criterion="material"><label>Cartel, tríptico o infografía</label><select class="criterion-select">
-        <option value="3">EXCELENTE: Información verídica y persuasiva.</option>
-        <option value="2">BUENO: Relevante pero no trasciende.</option>
-        <option value="1">REGULAR: Información básica y obvia.</option>
-        <option value="0">INSUFICIENTE: Información ambigua o inexistente.</option>
-    </select></div>
-
-    <div class="criterion-card" data-criterion="colaborativo"><label>Trabajo colaborativo</label><select class="criterion-select">
-        <option value="3">EXCELENTE: Trabajo totalmente colaborativo.</option>
-        <option value="2">BUENO: Mayoría trabaja colaborativamente.</option>
-        <option value="1">REGULAR: Parcialmente colaborativo.</option>
-        <option value="0">INSUFICIENTE: No trabajan colaborativamente.</option>
-    </select></div>
-
-    <div class="criterion-card" data-criterion="vestimenta"><label>Vestimenta formal</label><select class="criterion-select">
-        <option value="3">EXCELENTE: Cumple totalmente.</option>
-        <option value="2">BUENO: Cumple en su mayoría.</option>
-        <option value="1">REGULAR: Cumple parcialmente.</option>
-        <option value="0">INSUFICIENTE: No cumple.</option>
-    </select></div>
-
-    <div class="criterion-card" data-criterion="lenguaje"><label>Lenguaje verbal y corporal</label><select class="criterion-select">
-        <option value="3">EXCELENTE: Adecuado.</option>
-        <option value="2">BUENO: Mayoría adecuado.</option>
-        <option value="1">REGULAR: Parcialmente adecuado.</option>
-        <option value="0">INSUFICIENTE: No es adecuado.</option>
-    </select></div>
-
-    <div class="criterion-card" data-criterion="tiempo"><label>Tiempo de presentación</label><select class="criterion-select">
-        <option value="3">EXCELENTE: 11-15 minutos.</option>
-        <option value="2">BUENO: 7-10 o 16-19 minutos.</option>
-        <option value="1">REGULAR: 4-6 o 20-23 minutos.</option>
-        <option value="0">INSUFICIENTE: Menos de 4 o más de 23 minutos.</option>
-    </select></div>
-
-    <div class="criterion-card" data-criterion="ppt"><label>Estructura PowerPoint</label><select class="criterion-select">
-        <option value="3">EXCELENTE: Destacable, sin errores.</option>
-        <option value="2">BUENO: Mínimos errores, claro.</option>
-        <option value="1">REGULAR: Deficiente, errores frecuentes.</option>
-        <option value="0">INSUFICIENTE: Muy deficiente, ilegible.</option>
-    </select></div>
-
-    <div class="criterion-card" data-criterion="asistencia"><label>Puntualidad y asistencia</label><select class="criterion-select">
-        <option value="3">EXCELENTE: Puntual y responsable.</option>
-        <option value="2">BUENO: Puntual, participación breve.</option>
-        <option value="1">REGULAR: Llega tarde, poca participación.</option>
-        <option value="0">INSUFICIENTE: No asiste.</option>
-    </select></div>
-    
-    </div>
-                <div class="criterion-card slider-section">
-                    <label for="personalSlider">Evaluación Personal de Asignatura: <span id="sliderValue">5</span> pts</label>
-                    <input type="range" id="personalSlider" min="0" max="10" step="1" value="5">
-                    <div class="slider-ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+            <!-- Tarjeta de calificación base leída de Rúbrica General -->
+            <div id="baseScoreCard" class="criterion-card" style="margin-bottom:20px;">
+                <label>📊 Calificación Base del Equipo (60%) — de Rúbrica General</label>
+                <div id="baseScoreDisplay" style="display:flex; align-items:center; gap:14px; margin-top:8px;">
+                    <div id="baseScoreBadge" style="font-size:1.6rem; font-weight:800; padding:6px 18px; border-radius:10px; background:#e2e8f0; color:#334155; min-width:64px; text-align:center;">—</div>
+                    <div style="flex:1;">
+                        <div id="baseScoreStatus" style="font-size:0.85rem; color:#64748b;">Cargando calificación base...</div>
+                        <div id="baseScoreContrib" style="font-size:0.8rem; color:#94a3b8; margin-top:2px;"></div>
+                    </div>
+                    <button id="btnRecargarBase" class="btn-navigation" style="font-size:0.8rem; padding:6px 10px; white-space:nowrap;">🔄 Recargar</button>
                 </div>
             </div>
-            <div style="margin-top: 25px; margin-bottom: 15px;">
-                <button id="btnConfirmarEvaluacion" class="btn-primary" style="font-size: 1.1rem; padding: 14px;">Confirmar Evaluación</button>
+
+            <!-- Sliders individuales por alumno -->
+            <div id="rubricForm" class="rubric-form">
+                <div style="background:#f1f5f9; border-radius:10px; padding:12px 14px; margin-bottom:16px; border:1px solid #cbd5e1;">
+                    <p style="margin:0; font-size:0.88rem; color:#475569;">
+                        <strong>40% personal por alumno</strong> — ajusta el slider de cada integrante (0–10).
+                    </p>
+                </div>
+                <div id="slidersContainer"></div>
+            </div>
+
+            <div style="margin-top:25px; margin-bottom:15px;">
+                <button id="btnConfirmarEvaluacion" class="btn-primary" style="font-size:1.1rem; padding:14px;">Confirmar Evaluación</button>
             </div>
         </div>
     </div>
@@ -173,8 +107,7 @@
             <button class="btn-back-menu">← Menú</button>
             <h2>Consulta de Calificaciones</h2>
         </div>
-        
-        <div class="card-box" style="margin-bottom: 20px; padding: 20px;">
+        <div class="card-box" style="margin-bottom:20px; padding:20px;">
             <div class="filter-grid">
                 <div class="form-group">
                     <label for="readSemestre">Semestre:</label>
@@ -191,61 +124,55 @@
                         <option value="">Seleccione una materia...</option>
                     </select>
                 </div>
-                <div class="form-group" style="grid-column: 1 / -1;">
+                <div class="form-group" style="grid-column:1/-1;">
                     <label for="readGrupo">Grupo:</label>
                     <select id="readGrupo" disabled>
                         <option value="">Seleccione un grupo...</option>
                     </select>
                 </div>
             </div>
-            <div id="wrapperTipoVista" class="form-group" style="grid-column: 1 / -1; margin-top: 10px; display: flex; gap: 20px; align-items: center;">
-                    <label style="margin-bottom: 0;">Visualización:</label>
-                    <label style="display: inline-flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer;">
-                        <input type="radio" name="tipoVistaConsulta" value="equipos" checked> Por Equipos
-                    </label>
-                    <label style="display: inline-flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer;">
-                        <input type="radio" name="tipoVistaConsulta" value="alumnos"> Por Alumnos (Orden Alfabético)
-                    </label>
-                </div>
-            <button id="btnBuscarCalificaciones" class="btn-primary" style="margin-top: 15px; width: 100%;" disabled>Buscar Registros</button>
+            <!-- MEJORA 2: eliminados los radio buttons de vista por equipos/alumnos -->
+            <button id="btnBuscarCalificaciones" class="btn-primary" style="margin-top:15px; width:100%;" disabled>Buscar Registros</button>
         </div>
 
-        <div id="loaderConsulta" class="loader-spinner" style="display: none;"></div>
+        <!-- MEJORA 3: Botón exportar script CURA (oculto hasta que haya datos) -->
+        <button id="btnExportarCURA" class="btn-primary" style="display:none; margin-bottom:16px; background:#1e40af; font-size:0.95rem;">
+            📥 Exportar Script CURA (P4)
+        </button>
+
+        <div id="loaderConsulta" class="loader-spinner" style="display:none;"></div>
         <div id="containerResultados"></div>
     </div>
 
-    <div id="confirmModal" class="modal" style="display: none;">
+    <!-- Modal Confirmación -->
+    <div id="confirmModal" class="modal" style="display:none;">
         <div class="modal-content">
             <h2>Confirmar Evaluación</h2>
             <div class="confirm-summary">
                 <p><strong>Equipo:</strong> <span id="confirmEquipoText"></span></p>
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 12px 0;">
-                <p>Rúbrica General (Máx 6.0): <span id="confirmRubricaPond" style="font-weight: bold;">0.0</span></p>
-                <p>Evaluación Personal (Máx 4.0): <span id="confirmSliderPond" style="font-weight: bold;">0.0</span></p>
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 12px 0;">
-                <p style="font-size: 1.1rem; margin-bottom: 8px;"><strong>Calificación Final:</strong></p>
-                <div id="badgeCalificacion" class="score-badge"><span id="confirmCalificacionText">0.0</span> / 10</div>
+                <p style="font-size:0.85rem; color:#64748b;">Base del equipo (60%): <span id="confirmBaseText" style="font-weight:bold; color:var(--primary-color);">—</span></p>
+                <hr style="border:0; border-top:1px solid #eee; margin:12px 0;">
+                <p style="font-size:0.92rem; font-weight:600; margin-bottom:8px;">Calificaciones individuales:</p>
+                <div id="confirmAlumnosResumen" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto;"></div>
             </div>
-            <div style="display: flex; gap: 12px; margin-top: 20px;">
-                <button id="btnRegresarConfirm" class="btn-reset" style="flex: 1;">Regresar</button>
-                <button id="btnGuardarConfirm" class="btn-primary" style="flex: 1;">Confirmar</button>
+            <div style="display:flex; gap:12px; margin-top:20px;">
+                <button id="btnRegresarConfirm" class="btn-reset" style="flex:1;">Regresar</button>
+                <button id="btnGuardarConfirm" class="btn-primary" style="flex:1;">Confirmar y Guardar</button>
             </div>
         </div>
     </div>
 
-    <div id="successModal" class="modal" style="display: none;">
+    <div id="successModal" class="modal" style="display:none;">
         <div class="modal-content text-center">
-            <div id="modalIconContainer">
-                <div class="loader-spinner"></div>
-            </div>
-            <h2 id="modalStatusTitle" style="margin-top: 20px;">¡Evaluación Guardada!</h2>
-            <p id="modalStatusText">La calificación fue calculada y registrada correctamente.</p>
+            <div id="modalIconContainer"><div class="loader-spinner"></div></div>
+            <h2 id="modalStatusTitle" style="margin-top:20px;">Guardando...</h2>
+            <p id="modalStatusText">Registrando calificaciones individuales.</p>
         </div>
     </div>
 
-<script src="grupos.js"></script>
-<script src="materias.js"></script>
-<script src="alumnosEquipos.js"></script>
-<script src="app.js"></script>
+<script src="grupos.js?v=2"></script>
+<script src="materias.js?v=2"></script>
+<script src="alumnosEquipos.js?v=2"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>
