@@ -374,3 +374,8 @@ select:disabled {
     .details-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
     .welcome-container h1 { font-size: 2.5rem; }
 }
+/* ── Sliders individuales ── */
+.slider-alumno-card { transition: background-color 0.3s, border-color 0.3s; }
+.slider-alumno { accent-color: var(--accent-color); height: 6px; }
+.nota-preview-val { font-size:0.95rem; font-weight:800; color:var(--primary-color); }
+#baseScoreCard { background:#ffffff; border:1px solid #cbd5e1; }
