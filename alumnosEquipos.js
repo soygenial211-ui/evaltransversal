@@ -1,7 +1,35 @@
 const equiposPorGrupo = {
     "201": {
-        "SIN EQUIPO REGISTRADOS": [
-            "Sin alumnos registrados"
+        "EQUIPO 1": [
+            "ARREOLA DEVORA CAMILA RUBI",
+            "FRIAS PEREZ ZAMARA GUADALUPE",
+            "FUENTES RODRIGUEZ JOSE MARIA",
+            "PARRA REYES MARIO MIGUEL",
+            "VELASQUEZ GARCIA MARIA ISLENI",
+            "VALENZUELA RAMIREZ PAOLA GUADALUPE"
+        ],
+        "EQUIPO 2": [
+            "AVITIA REYES INGRID DENISSE",
+            "BETANCOURT ALDO IVAN",
+            "CAMACHO RIVERA DALIA",
+            "RUIZ FRANCO JULIETA",
+            "VALENZUELA VALENZUELA ANA MARIA",
+            "VARGAS RETANA JOSUE ANTONIO"
+        ],
+        "EQUIPO 3": [
+            "BENITEZ SANDOVAL XIMENA",
+            "CABALLERO LOPEZ NATALIA ISABELA",
+            "GALLEGOS GALLEGOS WENDY SYLEY",
+            "REYES ANGEL SOL DANELI",
+            "RODRIGUEZ CABALLERO JONATHAN FRANCISCO"
+        ],
+        "EQUIPO 4": [
+            "HERNANDEZ BRIANNA ABIGAIL",
+            "MARTINEZ TERRONES ELVIRA YAMILET",
+            "NUÑEZ MEZA ZAHID SEBASTIAN",
+            "OLGUIN CORRAL ALEXIS ARTURO",
+            "PADILLA VILLEGAS MAYTE",
+            "VALENZUELA MENDOZA NOEMI CAROLINA"
         ]
     },
     "202": {
